@@ -1,0 +1,67 @@
+import { PageItem } from "@/types/content";
+export const pages: PageItem[] = [
+  {
+    id: "page-home",
+    slug: "/",
+    title: "Inicio",
+    description: "P gina principal de Mindsolut.",
+    pageType: "home",
+    entityId: null,
+    seoTitle: "Mindsolut | Herramientas y recursos para resolver, practicar y aprender",
+    seoDescription:
+      "Explora herramientas, imprimibles, generadores y retos para resolver necesidades, practicar habilidades y aprender de forma £til.",
+    indexable: true,
+    status: "ready",
+  },
+  {
+    id: "page-resource-sumas-worksheet-01",
+    slug: "/imprimibles/worksheet-sumas-basicas-1",
+    title: "Worksheet de sumas b sicas 1",
+    description: "Ficha imprimible de sumas b sicas para primaria.",
+    pageType: "resource",
+    entityId: "asset-sumas-worksheet-01",
+    seoTitle: "Worksheet de sumas b sicas 1 | Mindsolut",
+    seoDescription:
+      "Descarga una ficha imprimible para practicar sumas b sicas en primaria.",
+    indexable: true,
+    status: "draft",
+  },
+  {
+    id: "page-bundle-sumas-iniciales",
+    slug: "/bundles/bundle-sumas-iniciales",
+    title: "Bundle de sumas iniciales",
+    description: "Pack descargable de recursos imprimibles de sumas.",
+    pageType: "bundle",
+    entityId: "bundle-sumas-iniciales",
+    seoTitle: "Bundle de sumas iniciales | Mindsolut",
+    seoDescription:
+      "Pack de recursos imprimibles para practicar sumas b sicas en primaria.",
+    indexable: true,
+    status: "draft",
+  },
+  {
+    id: "page-collection-matematicas-primaria",
+    slug: "/recursos-educativos/matematicas-primaria",
+    title: "Matem ticas para primaria",
+    description: "Colecci¢n de recursos y actividades de matem ticas.",
+    pageType: "collection",
+    entityId: "collection-matematicas-primaria",
+    seoTitle: "Recursos de matem ticas para primaria | Mindsolut",
+    seoDescription:
+      "Explora recursos imprimibles, bundles y actividades de matem ticas para primaria.",
+    indexable: true,
+    status: "draft",
+  },
+  {
+    id: "page-privacy",
+    slug: "/privacidad",
+    title: "Pol¡tica de privacidad",
+    description: "Pol¡tica de privacidad de Mindsolut.",
+    pageType: "legal",
+    entityId: null,
+    seoTitle: "Pol¡tica de privacidad | Mindsolut",
+    seoDescription: "Consulta la pol¡tica de privacidad de Mindsolut.",
+    indexable: true,
+    status: "draft",
+  },
+];
