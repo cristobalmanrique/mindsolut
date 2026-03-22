@@ -1,8 +1,10 @@
 export type StatusKey =
   | "draft"
   | "review"
+  | "seo-optimized"
   | "ready"
   | "published"
+  | "optimized"
   | "archived";
 
 export type AssetType =
