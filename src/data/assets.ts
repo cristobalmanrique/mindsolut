@@ -5,7 +5,7 @@ export const assets: AssetItem[] = [
     id: "asset-sumas-worksheet-01",
     slug: "worksheet-sumas-basicas-1",
     title: "Worksheet de sumas b sicas 1",
-    description: "Ficha imprimible para practicar sumas b sicas.",
+    description: "Ficha imprimible para practicar sumas básicas.",
     type: "worksheet",
     topicId: "topic-sumas-basicas",
     language: "es",

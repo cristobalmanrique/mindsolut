@@ -1,4 +1,5 @@
-import ContentDebugPanel from "@/components/sections/ContentDebugPanel";
+import EditorialPanel from "@/components/sections/EditorialPanel";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
@@ -10,7 +11,8 @@ export default function Home() {
           </p>
         </div>
       </section>
-      <ContentDebugPanel />
+
+      <EditorialPanel />
     </main>
   );
 }
