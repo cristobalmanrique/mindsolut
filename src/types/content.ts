@@ -71,6 +71,23 @@ export interface BundleItem {
   currency: string;
   coverImage: string;
   status: StatusKey;
+
+  pedagogicalCriteria?: boolean;
+  explainedAnswers?: boolean;
+  assessmentScale?: {
+    enabled: boolean;
+    evaluatedExercises: number;
+    ranges: {
+      min: number;
+      max: number;
+      label: string;
+    }[];
+  };
+  reinforcementBlock?: {
+    enabled: boolean;
+    extraExercises: number;
+  };
+  premiumValue?: string[];
 }
 
 export interface CollectionItem {

@@ -133,19 +133,22 @@ export const pages: PageItem[] = [
     indexable: true,
     status: "draft",
   },
-  {
-    id: "page-bundle-tablas-3-primaria",
-    slug: "/bundles/bundle-tablas-3-primaria",
-    title: "Bundle de tablas de multiplicar 3º primaria",
-    description: "Pack descargable de fichas de tablas de multiplicar para 3º de primaria.",
-    pageType: "bundle",
-    entityId: "bundle-tablas-3-primaria",
-    seoTitle: "Bundle de tablas de multiplicar 3º primaria | Mindsolut",
-    seoDescription:
-      "Pack descargable de fichas imprimibles de tablas de multiplicar para 3º de primaria.",
-    indexable: true,
-    status: "draft",
-  },
+
+{
+  id: "page-bundle-tablas-3-primaria",
+  slug: "/bundles/bundle-tablas-3-primaria",
+  title: "Bundle de tablas de multiplicar 3º primaria",
+  description:
+    "Pack premium de fichas de tablas de multiplicar para 3º de primaria, con resultados explicados, valoración y ejercicios de refuerzo.",
+  pageType: "bundle",
+  entityId: "bundle-tablas-3-primaria",
+  seoTitle: "Bundle premium de tablas de multiplicar 3º primaria | Mindsolut",
+  seoDescription:
+    "Pack descargable de fichas imprimibles con criterio pedagógico, resultados explicados, escala de valoración y ejercicios de refuerzo para 3º de primaria.",
+  indexable: true,
+  status: "draft",
+},
+
 
   {
     id: "page-privacy",

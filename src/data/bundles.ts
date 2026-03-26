@@ -5,7 +5,8 @@ export const bundles: BundleItem[] = [
     id: "bundle-sumas-1-primaria",
     slug: "bundle-sumas-1-primaria",
     title: "Bundle de sumas 1º primaria",
-    description: "Pack de fichas imprimibles para practicar sumas en 1º de primaria.",
+    description:
+      "Pack de fichas imprimibles para practicar sumas en 1º de primaria.",
     topicIds: ["topic-1-primaria-sumas"],
     assetIds: [
       "asset-1p-sumas-ficha-01",
@@ -24,7 +25,8 @@ export const bundles: BundleItem[] = [
     id: "bundle-restas-1-primaria",
     slug: "bundle-restas-1-primaria",
     title: "Bundle de restas 1º primaria",
-    description: "Pack de fichas imprimibles para practicar restas en 1º de primaria.",
+    description:
+      "Pack de fichas imprimibles para practicar restas en 1º de primaria.",
     topicIds: ["topic-1-primaria-restas"],
     assetIds: [
       "asset-1p-restas-ficha-01",
@@ -43,7 +45,8 @@ export const bundles: BundleItem[] = [
     id: "bundle-sumas-2-primaria",
     slug: "bundle-sumas-2-primaria",
     title: "Bundle de sumas 2º primaria",
-    description: "Pack de fichas imprimibles para practicar sumas en 2º de primaria.",
+    description:
+      "Pack de fichas imprimibles para practicar sumas en 2º de primaria.",
     topicIds: ["topic-2-primaria-sumas"],
     assetIds: [
       "asset-2p-sumas-ficha-01",
@@ -62,7 +65,8 @@ export const bundles: BundleItem[] = [
     id: "bundle-restas-2-primaria",
     slug: "bundle-restas-2-primaria",
     title: "Bundle de restas 2º primaria",
-    description: "Pack de fichas imprimibles para practicar restas en 2º de primaria.",
+    description:
+      "Pack de fichas imprimibles para practicar restas en 2º de primaria.",
     topicIds: ["topic-2-primaria-restas"],
     assetIds: [
       "asset-2p-restas-ficha-01",
@@ -81,7 +85,8 @@ export const bundles: BundleItem[] = [
     id: "bundle-tablas-3-primaria",
     slug: "bundle-tablas-3-primaria",
     title: "Bundle de tablas de multiplicar 3º primaria",
-    description: "Pack de fichas imprimibles para practicar las tablas de multiplicar en 3º de primaria.",
+    description:
+      "Pack premium de fichas imprimibles para practicar las tablas de multiplicar en 3º de primaria, con criterio pedagógico, resultados explicados, escala de valoración y ejercicios de refuerzo.",
     topicIds: ["topic-3-primaria-tablas-multiplicar"],
     assetIds: [
       "asset-3p-tablas-ficha-01",
@@ -100,5 +105,26 @@ export const bundles: BundleItem[] = [
     currency: "EUR",
     coverImage: "/covers/bundle-tablas-3-primaria.jpg",
     status: "draft",
+    pedagogicalCriteria: true,
+    explainedAnswers: true,
+    assessmentScale: {
+      enabled: true,
+      evaluatedExercises: 10,
+      ranges: [
+        { min: 0, max: 50, label: "Necesita refuerzo" },
+        { min: 60, max: 80, label: "En proceso" },
+        { min: 90, max: 100, label: "Dominio" },
+      ],
+    },
+    reinforcementBlock: {
+      enabled: true,
+      extraExercises: 6,
+    },
+    premiumValue: [
+      "Desarrollado con criterio pedagógico",
+      "Incluye resultados explicados",
+      "Contiene escala de valoración",
+      "Incluye ejercicios de refuerzo",
+    ],
   },
 ];
