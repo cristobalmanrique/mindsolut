@@ -1,0 +1,1 @@
+npx tsx scripts/generate-first-10-sum-pdfs.ts

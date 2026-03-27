@@ -2,6 +2,9 @@ import fs from "fs";
 import path from "path";
 import puppeteer from "puppeteer";
 import type { AssetItem } from "@/types/content";
+import type { WorksheetVariant } from "@/lib/pdf/types";
+import { detectVariant } from "@/lib/pdf/detectVariant";
+import { buildExercises } from "@/lib/pdf/buildExercises";
 
 type MathOperation = "sum";
 
@@ -16,25 +19,39 @@ function getPublicAbsolutePath(relativePublicPath: string): string {
   return path.join(process.cwd(), "public", cleanPath);
 }
 
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+function getWorksheetHtml(
+  asset: AssetItem,
+  exercises: string[],
+  variant: WorksheetVariant
+): string {
+  const isVertical = variant === "vertical";
+  const isVisual = variant === "visual";
+  const isCompleteResult = variant === "complete-result";
+  const isMissingNumber = variant === "missing-number";
 
-function buildExercises(operation: MathOperation, total: number): string[] {
-  const exercises: string[] = [];
+  const gridClass = isVertical ? "grid-vertical" : "grid";
+  const exerciseClass = isVisual ? "exercise exercise-visual" : "exercise";
+  const assetUrl = `https://mindsolut.com/recurso/${asset.slug}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(
+    assetUrl
+  )}`;
 
-  for (let i = 0; i < total; i++) {
-    if (operation === "sum") {
-      const a = randomInt(0, 20);
-      const b = randomInt(0, 20);
-      exercises.push(`${a} + ${b} = ______`);
-    }
+  let instruction =
+    "Resuelve las siguientes sumas y escribe el resultado correctamente.";
+
+  if (isCompleteResult) {
+    instruction = "Observa cada suma y completa el resultado que falta.";
   }
 
-  return exercises;
-}
+  if (isMissingNumber) {
+    instruction = "Completa el número que falta en cada suma.";
+  }
 
-function getWorksheetHtml(asset: AssetItem, exercises: string[]): string {
+  if (isVisual) {
+    instruction =
+      "Observa los dibujos y resuelve las siguientes sumas con apoyo visual.";
+  }
+
   return `
   <!doctype html>
   <html lang="es">
@@ -49,6 +66,59 @@ function getWorksheetHtml(asset: AssetItem, exercises: string[]): string {
           padding: 32px;
         }
 
+.complete-box {
+  display: inline-block;
+  min-width: 80px;
+  text-align: right;
+  font-size: 22px;
+  letter-spacing: 1px;
+  border-bottom: 2px solid #334155;
+  padding-bottom: 2px;
+}
+.exercise-index {
+  font-size: 12px;
+  color: #64748b;
+  margin-right: 6px;
+  font-weight: normal;
+}
+
+.vertical-exercise {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.vertical-numbering {
+  min-width: 24px;
+  font-size: 20px;
+  padding-top: 2px;
+}
+
+.vertical-stack {
+  min-width: 70px;
+}
+
+.vertical-line {
+  text-align: right;
+  font-size: 22px;
+  line-height: 1.4;
+  white-space: pre;
+}
+
+.vertical-separator {
+  border-bottom: 2px solid #334155;
+  margin: 4px 0 6px 0;
+}
+
+.vertical-answer {
+  height: 26px;
+}
+
+.vertical-answer-line {
+  text-align: right;
+  font-size: 22px;
+  letter-spacing: 1px;
+}
         .sheet {
           max-width: 800px;
           margin: 0 auto;
@@ -96,10 +166,22 @@ function getWorksheetHtml(asset: AssetItem, exercises: string[]): string {
           gap: 14px 28px;
         }
 
+        .grid-vertical {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 14px 20px;
+        }
+
         .exercise {
           font-size: 22px;
           padding: 10px 0;
           border-bottom: 1px dashed #cbd5e1;
+          min-height: 42px;
+        }
+
+        .exercise-visual {
+          font-size: 24px;
+          letter-spacing: 0.5px;
         }
 
         .footer {
@@ -108,6 +190,29 @@ function getWorksheetHtml(asset: AssetItem, exercises: string[]): string {
           color: #64748b;
           border-top: 1px solid #e2e8f0;
           padding-top: 12px;
+        }
+
+        .footer-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .footer-text {
+          max-width: 70%;
+          line-height: 1.5;
+        }
+
+        .qr {
+          width: 90px;
+          height: 90px;
+          object-fit: contain;
+        }
+
+        .link {
+          font-weight: bold;
+          color: #0f172a;
         }
       </style>
     </head>
@@ -123,15 +228,23 @@ function getWorksheetHtml(asset: AssetItem, exercises: string[]): string {
         </div>
 
         <div class="instruction">
-          Resuelve las siguientes sumas y escribe el resultado correctamente.
+          ${instruction}
         </div>
 
-        <div class="grid">
-          ${exercises.map((item) => `<div class="exercise">${item}</div>`).join("")}
+        <div class="${gridClass}">
+          ${exercises
+            .map((item) => `<div class="${exerciseClass}">${item}</div>`)
+            .join("")}
         </div>
 
         <div class="footer">
-          Mindsolut · Recurso educativo imprimible · ${asset.id}
+          <div class="footer-content">
+            <div class="footer-text">
+              <div>Mindsolut · Recurso educativo imprimible · ${asset.id}</div>
+              <div class="link">Más recursos en: ${assetUrl}</div>
+            </div>
+            <img class="qr" src="${qrUrl}" alt="QR Mindsolut" />
+          </div>
         </div>
       </div>
     </body>
@@ -146,8 +259,9 @@ export async function generateWorksheetPdf(
   const absoluteFilePath = getPublicAbsolutePath(asset.fileUrl);
   ensureDir(path.dirname(absoluteFilePath));
 
-  const exercises = buildExercises(operation, 20);
-  const html = getWorksheetHtml(asset, exercises);
+  const variant = detectVariant(asset);
+  const exercises = buildExercises(variant, asset);
+  const html = getWorksheetHtml(asset, exercises, variant);
 
   const browser = await puppeteer.launch({
     headless: true,

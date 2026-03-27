@@ -2,10 +2,19 @@
 
 import { useState } from "react";
 
+type CheckAssetsResult = {
+  ok?: boolean;
+  job?: string;
+  message?: string;
+  missingDownloads?: string[];
+  missingPreviews?: string[];
+};
+
 type JobState = {
   loading: boolean;
   message: string;
   isError: boolean;
+  data?: CheckAssetsResult | null;
 };
 
 async function runAction(url: string) {
@@ -32,10 +41,16 @@ function OperationButton({
     loading: false,
     message: "",
     isError: false,
+    data: null,
   });
 
   const onClick = async () => {
-    setState({ loading: true, message: "Ejecutando...", isError: false });
+    setState({
+      loading: true,
+      message: "Ejecutando...",
+      isError: false,
+      data: null,
+    });
 
     try {
       const data = await runAction(endpoint);
@@ -43,20 +58,27 @@ function OperationButton({
         loading: false,
         message: data?.message ?? "Proceso ejecutado correctamente.",
         isError: false,
+        data,
       });
     } catch (error) {
       setState({
         loading: false,
         message: error instanceof Error ? error.message : "Error desconocido",
         isError: true,
+        data: null,
       });
     }
   };
+
+  const missingDownloads = state.data?.missingDownloads ?? [];
+  const missingPreviews = state.data?.missingPreviews ?? [];
+  const isCheckAssets = endpoint === "/api/admin/check-assets";
 
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
       <h3 className="text-lg font-semibold text-white">{title}</h3>
       <p className="mt-2 text-sm text-slate-400">{description}</p>
+
       <button
         type="button"
         onClick={onClick}
@@ -70,6 +92,50 @@ function OperationButton({
         <p className={`mt-3 text-sm ${state.isError ? "text-red-300" : "text-emerald-300"}`}>
           {state.message}
         </p>
+      ) : null}
+
+      {isCheckAssets && !state.isError && state.data ? (
+        <div className="mt-4 space-y-4 text-sm">
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
+              <p className="text-slate-400">PDFs faltantes</p>
+              <p className="mt-2 text-2xl font-bold text-white">{missingDownloads.length}</p>
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
+              <p className="text-slate-400">Previews faltantes</p>
+              <p className="mt-2 text-2xl font-bold text-white">{missingPreviews.length}</p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
+              <h4 className="font-semibold text-white">Lista de PDFs faltantes</h4>
+              {missingDownloads.length > 0 ? (
+                <ul className="mt-3 max-h-64 list-disc space-y-1 overflow-auto pl-5 text-slate-300">
+                  {missingDownloads.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-emerald-300">No faltan PDFs.</p>
+              )}
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
+              <h4 className="font-semibold text-white">Lista de previews faltantes</h4>
+              {missingPreviews.length > 0 ? (
+                <ul className="mt-3 max-h-64 list-disc space-y-1 overflow-auto pl-5 text-slate-300">
+                  {missingPreviews.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-emerald-300">No faltan previews.</p>
+              )}
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );
