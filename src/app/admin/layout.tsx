@@ -9,6 +9,7 @@ export default function AdminLayout({
     { href: "/admin", label: "Resumen" },
     { href: "/admin/editorial", label: "Editorial" },
     { href: "/admin/generacion", label: "Generación" },
+    { href: "/admin/generacion-topic", label: "Generación por topic" },
     { href: "/admin/operaciones", label: "Operaciones" },
   ];
 

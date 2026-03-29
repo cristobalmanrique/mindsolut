@@ -1,6 +1,8 @@
 import type { AssetItem } from "@/types/content";
 import type { WorksheetVariant } from "@/lib/pdf/types";
 
+type MathOperation = "sum" | "subtraction" | "multiplication";
+
 function rand(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -32,47 +34,108 @@ function isEasyAsset(asset: AssetItem) {
   );
 }
 
-function getSumOperands(asset: AssetItem) {
+function getOperatorSymbol(operation: MathOperation) {
+  switch (operation) {
+    case "subtraction":
+      return "-";
+    case "multiplication":
+      return "×";
+    default:
+      return "+";
+  }
+}
+
+function getOperands(asset: AssetItem, operation: MathOperation) {
   const noCarry = isNoCarryAsset(asset);
   const easy = isEasyAsset(asset);
 
-  if (noCarry) {
-    const aUnits = rand(0, 4);
-    const bUnits = rand(0, 4);
-    const aTens = rand(0, 2);
-    const bTens = rand(0, 2);
+  if (operation === "sum") {
+    if (noCarry) {
+      const aUnits = rand(0, 4);
+      const bUnits = rand(0, 4);
+      const aTens = rand(0, 2);
+      const bTens = rand(0, 2);
 
-    const a = aTens * 10 + aUnits;
-    const b = bTens * 10 + bUnits;
+      const a = aTens * 10 + aUnits;
+      const b = bTens * 10 + bUnits;
 
+      return { a, b };
+    }
+
+    if (easy) {
+      const a = rand(0, 9);
+      const b = rand(0, 9 - a);
+      return { a, b };
+    }
+
+    return {
+      a: rand(0, 20),
+      b: rand(0, 20),
+    };
+  }
+
+  if (operation === "subtraction") {
+    if (easy) {
+      const a = rand(1, 9);
+      const b = rand(0, a);
+      return { a, b };
+    }
+
+    const a = rand(5, 20);
+    const b = rand(0, a);
     return { a, b };
   }
 
+  // multiplication
   if (easy) {
-    const a = rand(0, 9);
-    const b = rand(0, 9 - a);
-    return { a, b };
+    return {
+      a: rand(1, 5),
+      b: rand(1, 5),
+    };
   }
 
-  const a = rand(0, 20);
-  const b = rand(0, 20);
-  return { a, b };
+  return {
+    a: rand(1, 10),
+    b: rand(1, 10),
+  };
 }
 
-function buildHorizontalExercise(index: number, asset: AssetItem) {
-  const { a, b } = getSumOperands(asset);
-  return `${formatIndex(index)} ${a} + ${b} = ______`;
+function getResult(a: number, b: number, operation: MathOperation) {
+  switch (operation) {
+    case "subtraction":
+      return a - b;
+    case "multiplication":
+      return a * b;
+    default:
+      return a + b;
+  }
 }
 
-function buildVerticalExercise(index: number, asset: AssetItem) {
-  const { a, b } = getSumOperands(asset);
+function buildHorizontalExercise(
+  index: number,
+  asset: AssetItem,
+  operation: MathOperation
+) {
+  const { a, b } = getOperands(asset, operation);
+  const operator = getOperatorSymbol(operation);
+
+  return `${formatIndex(index)} ${a} ${operator} ${b} = ______`;
+}
+
+function buildVerticalExercise(
+  index: number,
+  asset: AssetItem,
+  operation: MathOperation
+) {
+  const { a, b } = getOperands(asset, operation);
+  const operator = getOperatorSymbol(operation);
 
   return `
     <div class="vertical-exercise">
       <div class="vertical-numbering">${formatIndex(index)}</div>
       <div class="vertical-stack">
         <div class="vertical-line">${padLeft(a)}</div>
-        <div class="vertical-line">+ ${padLeft(b)}</div>
+        <div class="vertical-line">${operator} ${padLeft(b)}</div>
         <div class="vertical-separator"></div>
         <div class="vertical-answer"></div>
       </div>
@@ -80,15 +143,20 @@ function buildVerticalExercise(index: number, asset: AssetItem) {
   `;
 }
 
-function buildCompleteResultExercise(index: number, asset: AssetItem) {
-  const { a, b } = getSumOperands(asset);
+function buildCompleteResultExercise(
+  index: number,
+  asset: AssetItem,
+  operation: MathOperation
+) {
+  const { a, b } = getOperands(asset, operation);
+  const operator = getOperatorSymbol(operation);
 
   return `
     <div class="vertical-exercise complete-result-exercise">
       <div class="vertical-numbering">${formatIndex(index)}</div>
       <div class="vertical-stack">
         <div class="vertical-line">${padLeft(a)}</div>
-        <div class="vertical-line">+ ${padLeft(b)}</div>
+        <div class="vertical-line">${operator} ${padLeft(b)}</div>
         <div class="vertical-separator"></div>
         <div class="vertical-answer-line complete-box">______</div>
       </div>
@@ -96,30 +164,68 @@ function buildCompleteResultExercise(index: number, asset: AssetItem) {
   `;
 }
 
-function buildMissingNumberExercise(index: number, asset: AssetItem) {
-  const { a, b } = getSumOperands(asset);
-  const total = a + b;
+function buildMissingNumberExercise(
+  index: number,
+  asset: AssetItem,
+  operation: MathOperation
+) {
+  const { a, b } = getOperands(asset, operation);
+  const operator = getOperatorSymbol(operation);
+  const total = getResult(a, b, operation);
+
+  if (operation === "multiplication") {
+    const hideFirst = Math.random() > 0.5;
+
+    if (hideFirst) {
+      return `${formatIndex(index)} ____ ${operator} ${b} = ${total}`;
+    }
+
+    return `${formatIndex(index)} ${a} ${operator} ____ = ${total}`;
+  }
+
+  if (operation === "subtraction") {
+    return `${formatIndex(index)} ${a} ${operator} ____ = ${total}`;
+  }
 
   const hideFirst = Math.random() > 0.5;
 
   if (hideFirst) {
-    return `${formatIndex(index)} ____ + ${b} = ${total}`;
+    return `${formatIndex(index)} ____ ${operator} ${b} = ${total}`;
   }
 
-  return `${formatIndex(index)} ${a} + ____ = ${total}`;
+  return `${formatIndex(index)} ${a} ${operator} ____ = ${total}`;
 }
 
-function buildVisualExercise(index: number, asset: AssetItem) {
+function buildVisualExercise(
+  index: number,
+  asset: AssetItem,
+  operation: MathOperation
+) {
   const easy = isEasyAsset(asset);
-
-  const a = easy ? rand(1, 8) : rand(1, 10);
-  const b = easy ? rand(1, 8) : rand(1, 10);
   const symbol = pickVisualSymbol();
+  const operator = getOperatorSymbol(operation);
 
-  return `${formatIndex(index)} ${a} ${symbol} + ${b} ${symbol} = ______`;
+  let a = easy ? rand(1, 8) : rand(1, 10);
+  let b = easy ? rand(1, 8) : rand(1, 10);
+
+  if (operation === "subtraction") {
+    a = easy ? rand(2, 9) : rand(3, 10);
+    b = rand(1, a);
+  }
+
+  if (operation === "multiplication") {
+    a = easy ? rand(1, 5) : rand(1, 9);
+    b = easy ? rand(1, 5) : rand(1, 9);
+  }
+
+  return `${formatIndex(index)} ${a} ${symbol} ${operator} ${b} ${symbol} = ______`;
 }
 
-export function buildExercises(variant: WorksheetVariant, asset: AssetItem) {
+export function buildExercises(
+  variant: WorksheetVariant,
+  asset: AssetItem,
+  operation: MathOperation
+) {
   const list: string[] = [];
 
   for (let i = 0; i < 18; i++) {
@@ -127,27 +233,27 @@ export function buildExercises(variant: WorksheetVariant, asset: AssetItem) {
 
     switch (variant) {
       case "horizontal":
-        list.push(buildHorizontalExercise(index, asset));
+        list.push(buildHorizontalExercise(index, asset, operation));
         break;
 
       case "vertical":
-        list.push(buildVerticalExercise(index, asset));
+        list.push(buildVerticalExercise(index, asset, operation));
         break;
 
       case "complete-result":
-        list.push(buildCompleteResultExercise(index, asset));
+        list.push(buildCompleteResultExercise(index, asset, operation));
         break;
 
       case "missing-number":
-        list.push(buildMissingNumberExercise(index, asset));
+        list.push(buildMissingNumberExercise(index, asset, operation));
         break;
 
       case "visual":
-        list.push(buildVisualExercise(index, asset));
+        list.push(buildVisualExercise(index, asset, operation));
         break;
 
       default:
-        list.push(buildVerticalExercise(index, asset));
+        list.push(buildVerticalExercise(index, asset, operation));
         break;
     }
   }

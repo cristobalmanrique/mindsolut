@@ -6,7 +6,7 @@ import type { WorksheetVariant } from "@/lib/pdf/types";
 import { detectVariant } from "@/lib/pdf/detectVariant";
 import { buildExercises } from "@/lib/pdf/buildExercises";
 
-type MathOperation = "sum";
+type MathOperation = "sum" | "subtraction" | "multiplication";
 
 function ensureDir(dirPath: string) {
   if (!fs.existsSync(dirPath)) {
@@ -256,11 +256,12 @@ export async function generateWorksheetPdf(
   asset: AssetItem,
   operation: MathOperation = "sum"
 ): Promise<{ filePath: string }> {
+
   const absoluteFilePath = getPublicAbsolutePath(asset.fileUrl);
   ensureDir(path.dirname(absoluteFilePath));
 
   const variant = detectVariant(asset);
-  const exercises = buildExercises(variant, asset);
+  const exercises = buildExercises(variant, asset, operation);
   const html = getWorksheetHtml(asset, exercises, variant);
 
   const browser = await puppeteer.launch({
