@@ -37,7 +37,7 @@ function getWorksheetHtml(
   )}`;
 
   let instruction =
-    "Resuelve las siguientes sumas y escribe el resultado correctamente.";
+    "Resuelve las siguientes operaciones y escribe el resultado correctamente.";
 
   if (isCompleteResult) {
     instruction = "Observa cada suma y completa el resultado que falta.";
@@ -49,7 +49,7 @@ function getWorksheetHtml(
 
   if (isVisual) {
     instruction =
-      "Observa los dibujos y resuelve las siguientes sumas con apoyo visual.";
+      "Observa los dibujos y resuelve las siguientes operaciones con apoyo visual.";
   }
 
   return `
@@ -261,8 +261,12 @@ export async function generateWorksheetPdf(
   ensureDir(path.dirname(absoluteFilePath));
 
   const variant = detectVariant(asset);
-  const exercises = buildExercises(variant, asset, operation);
-  const html = getWorksheetHtml(asset, exercises, variant);
+
+  import { buildExerciseSet } from "@/lib/pdf/buildExerciseSet";
+  import { renderWorksheetHtml } from "@/lib/pdf/templates/renderWorksheetHtml";
+
+  const worksheet = buildExerciseSet(asset, operation);
+  const html = renderWorksheetHtml(asset, worksheet);
 
   const browser = await puppeteer.launch({
     headless: true,
