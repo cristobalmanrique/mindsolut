@@ -37,7 +37,8 @@ export interface StandardExercise extends ExerciseBase {
   b: number;
   operator: "+" | "-" | "×";
   answerBlank: boolean;
-  missingField?: "result" | "a" | "b";
+  missingField: "a" | "b" | "result";
+  layout: "horizontal" | "vertical";
 }
 
 export interface ObjectsExercise extends ExerciseBase {

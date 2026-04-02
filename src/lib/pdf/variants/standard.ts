@@ -23,6 +23,14 @@ function isNoCarryAsset(asset: AssetItem) {
   return asset.slug.includes("sin-llevadas");
 }
 
+function isHorizontal(asset: AssetItem) {
+  return (
+    asset.slug.includes("horizontal") ||
+    asset.slug.includes("dibujo") ||
+    asset.slug.includes("dibujos")
+  );
+}
+
 function getOperator(operation: MathOperation): "+" | "-" | "×" {
   if (operation === "subtraction") return "-";
   if (operation === "multiplication") return "×";
@@ -91,24 +99,6 @@ function getMissingField(asset: AssetItem): "result" | "a" | "b" {
   return "result";
 }
 
-function buildStandardExercise(
-  index: number,
-  asset: AssetItem,
-  operation: MathOperation
-): StandardExercise {
-  const { a, b } = getOperands(asset, operation);
-
-  return {
-    id: `standard-${index}`,
-    kind: "standard",
-    a,
-    b,
-    operator: getOperator(operation),
-    answerBlank: true,
-    missingField: getMissingField(asset),
-  };
-}
-
 function getInstruction(asset: AssetItem, operation: MathOperation) {
   if (asset.slug.includes("completar-numeros")) {
     return "Completa el número que falta en cada operación.";
@@ -127,6 +117,25 @@ function getInstruction(asset: AssetItem, operation: MathOperation) {
   }
 
   return "Resuelve las operaciones y escribe el resultado correctamente.";
+}
+
+function buildStandardExercise(
+  index: number,
+  asset: AssetItem,
+  operation: MathOperation
+): StandardExercise {
+  const { a, b } = getOperands(asset, operation);
+
+  return {
+    id: `standard-${index}`,
+    kind: "standard",
+    a,
+    b,
+    operator: getOperator(operation),
+    answerBlank: true,
+    missingField: getMissingField(asset),
+    layout: isHorizontal(asset) ? "horizontal" : "vertical",
+  };
 }
 
 export function buildStandardWorksheet(

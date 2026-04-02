@@ -142,29 +142,36 @@ export function renderGameTemplate(
       <meta charset="UTF-8" />
       <title>${worksheet.title}</title>
       <style>
+        @page {
+          size: A4;
+          margin: 10mm;
+        }
+
         body {
           font-family: Arial, Helvetica, sans-serif;
           color: #1e293b;
           margin: 0;
-          padding: 24px;
+          padding: 0;
           background: #ffffff;
         }
 
         .sheet {
-          max-width: 820px;
+          max-width: 780px;
           margin: 0 auto;
           border: 2px dashed #cbd5e1;
           border-radius: 18px;
-          padding: 20px 22px 18px;
+          padding: 18px 20px 14px;
           background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+          page-break-inside: avoid;
+          break-inside: avoid;
         }
 
         .header {
           display: flex;
           align-items: flex-start;
           justify-content: space-between;
-          gap: 16px;
-          margin-bottom: 18px;
+          gap: 14px;
+          margin-bottom: 14px;
         }
 
         .header-left {
@@ -177,89 +184,90 @@ export function renderGameTemplate(
           color: #166534;
           border-radius: 999px;
           padding: 5px 10px;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 700;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
         }
 
         .title {
-          font-size: 27px;
-          line-height: 1.15;
+          font-size: 25px;
+          line-height: 1.12;
           font-weight: 800;
           color: #0f172a;
-          margin: 0 0 8px 0;
+          margin: 0 0 6px 0;
         }
 
         .instruction {
-          font-size: 15px;
-          line-height: 1.45;
+          font-size: 14px;
+          line-height: 1.4;
           color: #475569;
           margin: 0;
         }
 
         .mini-illustration {
-          font-size: 42px;
+          font-size: 34px;
           line-height: 1;
         }
 
         .student-row {
           display: flex;
-          gap: 18px;
-          margin: 16px 0 20px;
+          gap: 16px;
+          margin: 12px 0 16px;
         }
 
         .student-field {
           flex: 1;
           border-bottom: 1px solid #94a3b8;
-          padding-bottom: 6px;
-          font-size: 13px;
+          padding-bottom: 5px;
+          font-size: 12px;
           color: #475569;
         }
 
         .game-index {
-          font-size: 12px;
+          font-size: 11px;
           color: #64748b;
           font-weight: 700;
+          flex-shrink: 0;
         }
 
         .sequence-block {
           border: 1px solid #ddd6fe;
           background: #f5f3ff;
           border-radius: 16px;
-          padding: 14px 16px;
-          margin-bottom: 16px;
+          padding: 12px 14px;
+          margin-bottom: 12px;
         }
 
         .sequence-label {
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 700;
           color: #5b21b6;
-          margin: 8px 0 12px;
+          margin: 6px 0 10px;
         }
 
         .sequence-row {
           display: flex;
           align-items: center;
           flex-wrap: wrap;
-          gap: 8px;
+          gap: 6px;
         }
 
         .sequence-node-wrap {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
         }
 
         .sequence-node {
-          width: 44px;
-          height: 44px;
+          width: 40px;
+          height: 40px;
           border: 2px solid #7c3aed;
           border-radius: 12px;
           background: #ffffff;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 18px;
+          font-size: 17px;
           font-weight: 800;
           color: #1e293b;
         }
@@ -269,28 +277,29 @@ export function renderGameTemplate(
         }
 
         .sequence-arrow {
-          font-size: 14px;
+          font-size: 13px;
           color: #5b21b6;
           font-weight: 700;
-          min-width: 26px;
+          min-width: 24px;
           text-align: center;
         }
 
         .match-layout {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 18px;
+          grid-template-columns: minmax(180px, 240px) minmax(120px, 160px);
+          justify-content: center;
+          gap: 90px;
         }
 
         .match-column {
           border: 1px solid #bfdbfe;
           background: #eff6ff;
           border-radius: 16px;
-          padding: 14px 16px;
+          padding: 16px 18px;
         }
 
         .match-column-title {
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 800;
           color: #1d4ed8;
           margin-bottom: 10px;
@@ -299,10 +308,14 @@ export function renderGameTemplate(
         .match-item {
           display: flex;
           align-items: center;
-          gap: 8px;
-          border-bottom: 1px dashed #cbd5e1;
+          gap: 10px;
           padding: 8px 0;
-          min-height: 30px;
+          min-height: 32px;
+          border-bottom: 1px dashed #cbd5e1;
+        }
+
+        .match-item:last-child {
+          border-bottom: none;
         }
 
         .result-item {
@@ -312,65 +325,68 @@ export function renderGameTemplate(
         .match-expression {
           font-size: 18px;
           color: #0f172a;
+          line-height: 1.2;
         }
 
         .puzzle-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 14px;
+          gap: 12px;
         }
 
         .puzzle-card {
           border: 1px solid #fde68a;
           background: #fffbeb;
           border-radius: 16px;
-          padding: 14px;
-          min-height: 120px;
+          padding: 12px;
+          min-height: 110px;
         }
 
         .puzzle-expression {
-          font-size: 24px;
+          font-size: 22px;
           font-weight: 700;
-          margin: 14px 0 20px;
+          margin: 12px 0 16px;
           color: #92400e;
         }
 
         .puzzle-answer-box {
           width: 100%;
-          height: 42px;
+          height: 38px;
           border: 3px solid #92400e;
           border-radius: 12px;
           background: #ffffff;
         }
 
         .footer {
-          margin-top: 20px;
+          margin-top: 16px;
           border-top: 1px solid #e2e8f0;
-          padding-top: 12px;
+          padding-top: 10px;
         }
 
         .footer-content {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 16px;
+          gap: 14px;
         }
 
         .footer-text {
-          font-size: 12px;
-          line-height: 1.5;
+          font-size: 11px;
+          line-height: 1.45;
           color: #64748b;
         }
 
         .footer-link {
           font-weight: 700;
           color: #0f172a;
+          word-break: break-word;
         }
 
         .qr {
-          width: 82px;
-          height: 82px;
+          width: 72px;
+          height: 72px;
           object-fit: contain;
+          flex-shrink: 0;
         }
       </style>
     </head>

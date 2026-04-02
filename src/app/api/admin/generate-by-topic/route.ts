@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { assets } from "@/data/assets";
-import { generateWorksheetPdf } from "@/lib/pdf/generateWorksheetPdf";
+import { generateWorksheetAssets } from "@/lib/pdf/generateWorksheetAssets";
+
+export const runtime = "nodejs";
 
 type MathOperation = "sum" | "subtraction" | "multiplication";
 
@@ -30,6 +32,13 @@ export async function POST(request: NextRequest) {
         {
           ok: false,
           message: "Debes enviar un topicId válido.",
+          generatedCount: 0,
+          skippedCount: 0,
+          failedCount: 0,
+          files: [],
+          previews: [],
+          skipped: [],
+          failed: [],
         },
         { status: 400 }
       );
@@ -44,6 +53,13 @@ export async function POST(request: NextRequest) {
         {
           ok: false,
           message: `No se encontraron assets tipo worksheet para ${topicId}.`,
+          generatedCount: 0,
+          skippedCount: 0,
+          failedCount: 0,
+          files: [],
+          previews: [],
+          skipped: [],
+          failed: [],
         },
         { status: 404 }
       );
@@ -52,16 +68,29 @@ export async function POST(request: NextRequest) {
     const operation = detectOperationFromTopicId(topicId);
 
     const files: string[] = [];
-    let generated = 0;
-    let skipped = 0;
+    const previews: string[] = [];
+    const skipped: { file: string; reason: string }[] = [];
+    const failed: { file: string; reason: string }[] = [];
 
     for (const asset of topicAssets) {
       try {
-        await generateWorksheetPdf(asset, operation);
+        if (asset.status === "archived") {
+          skipped.push({
+            file: asset.fileUrl,
+            reason: "Asset archivado",
+          });
+          continue;
+        }
+
+        await generateWorksheetAssets(asset, operation);
+
         files.push(asset.fileUrl);
-        generated++;
-      } catch {
-        skipped++;
+        previews.push(asset.previewImage);
+      } catch (error) {
+        failed.push({
+          file: asset.fileUrl,
+          reason: error instanceof Error ? error.message : "Error desconocido",
+        });
       }
     }
 
@@ -69,10 +98,14 @@ export async function POST(request: NextRequest) {
       ok: true,
       topicId,
       operation,
-      generated,
-      skipped,
+      generatedCount: files.length,
+      skippedCount: skipped.length,
+      failedCount: failed.length,
       files,
-      message: `Generación completada para ${topicId}.`,
+      previews,
+      skipped,
+      failed,
+      message: `Generación de PDFs y previews completada para ${topicId}.`,
     });
   } catch (error) {
     return NextResponse.json(
@@ -81,7 +114,14 @@ export async function POST(request: NextRequest) {
         message:
           error instanceof Error
             ? error.message
-            : "Error interno al generar PDFs por topic.",
+            : "Error interno al generar assets por topic.",
+        generatedCount: 0,
+        skippedCount: 0,
+        failedCount: 0,
+        files: [],
+        previews: [],
+        skipped: [],
+        failed: [],
       },
       { status: 500 }
     );
