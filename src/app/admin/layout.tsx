@@ -8,10 +8,11 @@ export default function AdminLayout({
   const items = [
     { href: "/admin", label: "Resumen" },
     { href: "/admin/editorial", label: "Editorial" },
-    { href: "/admin/generacion", label: "Generación" },
     { href: "/admin/generacion-topic", label: "Generación por topic" },
+    { href: "/admin/seo-topic", label: "SEO por topic" },
     { href: "/admin/operaciones", label: "Operaciones" },
-    { href: "/admin/previews-topic", label: "Previews por topic" },
+    { href: "/admin/generacion", label: "Generación (Deprecated)" },
+    { href: "/admin/previews-topic", label: "Previews por topic (Deprecated)" },
   ];
 
   return (

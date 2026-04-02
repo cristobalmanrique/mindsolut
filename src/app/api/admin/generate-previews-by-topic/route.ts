@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { assets } from "@/data/assets";
-import { generatePreviewFromHtml } from "@/lib/previews/generatePreviewFromHtml";
+import { generateWorksheetAssets } from "@/lib/pdf/generateWorksheetAssets";
 
 export const runtime = "nodejs";
 
@@ -8,6 +8,22 @@ type FailedItem = {
   file: string;
   reason: string;
 };
+
+type MathOperation = "sum" | "subtraction" | "multiplication";
+
+function detectOperationFromTopicId(topicId: string): MathOperation {
+  if (topicId.includes("restas")) return "subtraction";
+
+  if (
+    topicId.includes("multiplicar") ||
+    topicId.includes("multiplicacion") ||
+    topicId.includes("tablas")
+  ) {
+    return "multiplication";
+  }
+
+  return "sum";
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,27 +69,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const operation = detectOperationFromTopicId(topicId);
+
     const generated: string[] = [];
     const skipped: FailedItem[] = [];
     const failed: FailedItem[] = [];
 
     for (const asset of topicAssets) {
       try {
-        const result = await generatePreviewFromHtml(asset);
-
-        if (result.ok && !result.skipped) {
-          generated.push(asset.previewImage);
-        } else if (result.skipped) {
+        if (!asset.previewImage || !asset.fileUrl) {
           skipped.push({
-            file: asset.previewImage,
-            reason: result.reason ?? "Saltado",
+            file: asset.slug,
+            reason: "Falta previewImage o fileUrl",
           });
-        } else {
-          failed.push({
-            file: asset.previewImage,
-            reason: result.reason ?? "Error desconocido",
-          });
+          continue;
         }
+
+        await generateWorksheetAssets(asset, operation);
+
+        generated.push(asset.previewImage);
       } catch (error) {
         failed.push({
           file: asset.previewImage,
@@ -91,7 +105,7 @@ export async function POST(request: NextRequest) {
       generated,
       skipped,
       failed,
-      message: `Generación de previews completada para ${topicId}.`,
+      message: `Generación de previews (y PDFs) completada para ${topicId}.`,
     });
   } catch (error) {
     return NextResponse.json(

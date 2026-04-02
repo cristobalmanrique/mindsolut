@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { assets } from "@/data/assets";
-import { generatePreview } from "@/lib/previews/generatePreview";
+import { generateSeoPayload } from "@/lib/seo/generateSeoPayload";
+import {
+  writeSeoPage,
+  updateAssetStatus,
+  readPersistedStatuses,
+} from "@/lib/seo/seoStorage";
+
 export const runtime = "nodejs";
 
-type FailedItem = {
+type ItemResult = {
   file: string;
-  reason: string;
+  reason?: string;
 };
 
 export async function POST(request: NextRequest) {
@@ -29,18 +35,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const topicAssets = assets.filter(
-      (asset) =>
+    const persistedStatuses = readPersistedStatuses();
+
+    const topicAssets = assets.filter((asset) => {
+      const effectiveStatus = persistedStatuses[asset.id] ?? asset.status;
+
+      return (
         asset.topicId === topicId &&
         asset.type === "worksheet" &&
-        asset.status !== "archived"
-    );
+        effectiveStatus === "seo-optimized"
+      );
+    });
 
     if (topicAssets.length === 0) {
       return NextResponse.json(
         {
           ok: false,
-          message: `No se encontraron assets válidos para ${topicId}.`,
+          message: `No se encontraron assets en estado seo-optimized para ${topicId}.`,
           generatedCount: 0,
           skippedCount: 0,
           failedCount: 0,
@@ -52,30 +63,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const generated: string[] = [];
-    const skipped: FailedItem[] = [];
-    const failed: FailedItem[] = [];
+    const generated: ItemResult[] = [];
+    const skipped: ItemResult[] = [];
+    const failed: ItemResult[] = [];
 
     for (const asset of topicAssets) {
       try {
-        const result = await generatePreview(asset);
-
-        if (result.ok && !result.skipped) {
-          generated.push(asset.previewImage);
-        } else if (result.skipped) {
+        if (!asset.fileUrl || !asset.previewImage) {
           skipped.push({
-            file: asset.previewImage,
-            reason: result.reason ?? "Saltado",
+            file: asset.slug,
+            reason: "El asset no tiene fileUrl o previewImage",
           });
-        } else {
-          failed.push({
-            file: asset.previewImage,
-            reason: result.reason ?? "Error desconocido",
-          });
+          continue;
         }
+
+        const payload = generateSeoPayload(asset);
+        writeSeoPage(asset.slug, payload);
+
+        updateAssetStatus(asset.id, "ready");
+
+        generated.push({
+          file: `storage/seo/pages/${asset.slug}.json`,
+        });
       } catch (error) {
         failed.push({
-          file: asset.previewImage,
+          file: asset.slug,
           reason: error instanceof Error ? error.message : "Error desconocido",
         });
       }
@@ -90,7 +102,7 @@ export async function POST(request: NextRequest) {
       generated,
       skipped,
       failed,
-      message: `Generación de previews completada para ${topicId}.`,
+      message: `Generación SEO completada para ${topicId}. Los assets generados fueron movidos a ready.`,
     });
   } catch (error) {
     return NextResponse.json(
@@ -99,7 +111,7 @@ export async function POST(request: NextRequest) {
         message:
           error instanceof Error
             ? error.message
-            : "Error interno generando previews.",
+            : "Error interno generando páginas SEO por topic.",
         generatedCount: 0,
         skippedCount: 0,
         failedCount: 0,

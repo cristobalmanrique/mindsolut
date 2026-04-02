@@ -1,5 +1,11 @@
 import type { AssetItem } from "@/types/content";
 import type { WorksheetVariant } from "@/lib/pdf/types";
+import { detectVariant } from "@/lib/pdf/detectVariant";
+import { buildStandardWorksheet } from "@/lib/pdf/variants/standard";
+import { buildObjectsWorksheet } from "@/lib/pdf/variants/objects";
+import { buildGameSequenceWorksheet } from "@/lib/pdf/variants/gameSequence";
+import { buildGamePuzzleWorksheet } from "@/lib/pdf/variants/gamePuzzle";
+import { buildGameMatchWorksheet } from "@/lib/pdf/variants/gameMatch";
 
 type MathOperation = "sum" | "subtraction" | "multiplication";
 
@@ -221,42 +227,23 @@ function buildVisualExercise(
   return `${formatIndex(index)} ${a} ${symbol} ${operator} ${b} ${symbol} = ______`;
 }
 
-export function buildExercises(
-  variant: WorksheetVariant,
-  asset: AssetItem,
-  operation: MathOperation
-) {
-  const list: string[] = [];
+export function buildExerciseSet(asset: AssetItem, operation: MathOperation) {
+  const variant = detectVariant(asset);
 
-  for (let i = 0; i < 18; i++) {
-    const index = i + 1;
+  switch (variant) {
+    case "objects":
+      return buildObjectsWorksheet(asset, operation);
 
-    switch (variant) {
-      case "horizontal":
-        list.push(buildHorizontalExercise(index, asset, operation));
-        break;
+    case "game-sequence":
+      return buildGameSequenceWorksheet(asset, operation);
 
-      case "vertical":
-        list.push(buildVerticalExercise(index, asset, operation));
-        break;
+    case "game-puzzle":
+      return buildGamePuzzleWorksheet(asset, operation);
 
-      case "complete-result":
-        list.push(buildCompleteResultExercise(index, asset, operation));
-        break;
+    case "game-match":
+      return buildGameMatchWorksheet(asset, operation);
 
-      case "missing-number":
-        list.push(buildMissingNumberExercise(index, asset, operation));
-        break;
-
-      case "visual":
-        list.push(buildVisualExercise(index, asset, operation));
-        break;
-
-      default:
-        list.push(buildVerticalExercise(index, asset, operation));
-        break;
-    }
+    default:
+      return buildStandardWorksheet(asset, operation);
   }
-
-  return list;
 }

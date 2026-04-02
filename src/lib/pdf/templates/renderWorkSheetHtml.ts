@@ -1,6 +1,5 @@
 import type { AssetItem } from "@/types/content";
-import type { WorksheetBuildResult } from "../types";
-
+import type { WorksheetBuildResult } from "@/lib/pdf/types";
 import { renderStandardTemplate } from "./standardTemplate";
 import { renderObjectsTemplate } from "./objectsTemplate";
 import { renderGameTemplate } from "./gameTemplate";
