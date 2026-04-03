@@ -4,6 +4,7 @@ import { renderStandardTemplate } from "./standardTemplate";
 import { renderObjectsTemplate } from "./objectsTemplate";
 import { renderGameTemplate } from "./gameTemplate";
 
+
 export function renderWorksheetHtml(
   asset: AssetItem,
   worksheet: WorksheetBuildResult
@@ -11,7 +12,6 @@ export function renderWorksheetHtml(
   switch (worksheet.variant) {
     case "objects":
       return renderObjectsTemplate(asset, worksheet);
-
     case "game-sequence":
     case "game-match":
     case "game-puzzle":
