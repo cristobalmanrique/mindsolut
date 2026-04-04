@@ -1,0 +1,36 @@
+Integración mínima en el panel editorial
+
+1) En la acción que cambia el estado de un asset:
+import { assets } from "@/data/assets";
+import { transitionAssetEditorialStatus } from "@/lib/editorial/assetWorkflow";
+
+const asset = assets.find((item) => item.id === assetId);
+if (!asset) {
+  throw new Error(`Asset not found: ${assetId}`);
+}
+
+await transitionAssetEditorialStatus(asset, nextStatus);
+
+2) Reglas de transición soportadas:
+draft -> review
+review -> seo-optimized
+review -> ready
+seo-optimized -> ready
+
+3) Efectos automáticos:
+draft -> review
+- mueve PDF: storage/drafts -> storage/review
+
+review -> seo-optimized
+- no mueve archivos
+
+seo-optimized -> ready
+- mueve PDF: storage/review -> public/downloads
+- mueve preview: storage/previews -> public/previews
+
+review -> ready
+- mismo comportamiento que el punto anterior
+
+4) El generador ya deja:
+- PDF: storage/drafts
+- preview: storage/previews

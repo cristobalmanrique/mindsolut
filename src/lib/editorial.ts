@@ -1,32 +1,29 @@
-import type { AssetItem, StatusKey } from "@/types/content";
+import { statusList } from "@/data/status";
 
-const allowedTransitions: Record<StatusKey, StatusKey[]> = {
-  draft: ["review"],
-  review: ["seo-optimized"],
-  "seo-optimized": ["ready"],
-  ready: ["published"],
-  published: ["optimized", "archived"],
-  optimized: ["archived"],
-  archived: [],
-};
-
-export function canTransition(from: StatusKey, to: StatusKey): boolean {
-  return allowedTransitions[from].includes(to);
+export function getStatusIndex(statusKey: string): number {
+  return statusList.findIndex((s) => s.key === statusKey);
 }
 
-export function getNextStatuses(from: StatusKey): StatusKey[] {
-  return allowedTransitions[from];
-}
+export function getNextStatus(statusKey: string): string | null {
+  const index = getStatusIndex(statusKey);
 
-export function changeStatus(asset: AssetItem, newStatus: StatusKey): AssetItem {
-  if (!canTransition(asset.status, newStatus)) {
-    throw new Error(
-      `Transición no permitida: ${asset.status} -> ${newStatus}`
-    );
+  if (index === -1 || index === statusList.length - 1) {
+    return null;
   }
 
-  return {
-    ...asset,
-    status: newStatus,
-  };
+  return statusList[index + 1].key;
+}
+
+export function getPreviousStatus(statusKey: string): string | null {
+  const index = getStatusIndex(statusKey);
+
+  if (index <= 0) {
+    return null;
+  }
+
+  return statusList[index - 1].key;
+}
+
+export function isValidStatus(statusKey: string): boolean {
+  return statusList.some((s) => s.key === statusKey);
 }

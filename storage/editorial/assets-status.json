@@ -1,8 +1,315 @@
 {
-  "asset-1p-sumas-ficha-01": "ready",
-  "asset-1p-sumas-ficha-02": "ready",
-  "asset-1p-sumas-ficha-03": "ready",
-  "asset-1p-sumas-ficha-04": "ready",
-  "asset-1p-sumas-ficha-05": "ready",
-  "asset-1p-sumas-ficha-06": "ready"
+  "assets": [
+    {
+      "assetId": "asset-1p-restas-ficha-01",
+      "slug": "ficha-restas-1-primaria-para-imprimir",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.826Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-02",
+      "slug": "ficha-restas-sin-llevadas-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.829Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-03",
+      "slug": "ficha-restas-basicas-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.832Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-04",
+      "slug": "ficha-restas-faciles-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.835Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-05",
+      "slug": "ficha-restas-con-dibujos-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.838Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-06",
+      "slug": "ficha-restas-horizontal-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.841Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-07",
+      "slug": "ficha-restas-horizontales-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.843Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-08",
+      "slug": "ficha-restas-con-dibujos-faciles-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.847Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-09",
+      "slug": "ficha-restas-completar-resultados-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.848Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-10",
+      "slug": "ficha-restas-completar-numeros-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.851Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-11",
+      "slug": "ficha-restas-juego-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.854Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-12",
+      "slug": "ficha-restas-rapidas-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.857Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-13",
+      "slug": "ficha-restas-con-objetos-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.860Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-14",
+      "slug": "ficha-restas-de-dos-numeros-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.862Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-15",
+      "slug": "ficha-restas-faciles-para-imprimir-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.865Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-16",
+      "slug": "ficha-restas-con-resultados-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.868Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-17",
+      "slug": "ficha-restas-basicas-para-ninos-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.871Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-18",
+      "slug": "ficha-restas-para-practicar-en-casa-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.874Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-19",
+      "slug": "ficha-restas-numeros-pequenos-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.877Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-20",
+      "slug": "ficha-restas-ejercicios-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.896Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-21",
+      "slug": "ficha-restas-para-imprimir-pdf-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.898Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-22",
+      "slug": "ficha-restas-actividades-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.901Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-23",
+      "slug": "ficha-restas-sencillas-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.904Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-24",
+      "slug": "ficha-restas-nivel-inicial-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.907Z"
+    },
+    {
+      "assetId": "asset-1p-restas-ficha-25",
+      "slug": "ficha-restas-ejercicios-basicos-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:34.910Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-01",
+      "slug": "ficha-sumas-1-primaria-para-imprimir-pdf",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:27.951Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-02",
+      "slug": "ficha-sumas-sin-llevadas-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:27.957Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-03",
+      "slug": "ficha-sumas-basicas-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:27.962Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-04",
+      "slug": "ficha-sumas-faciles-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:27.965Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-05",
+      "slug": "ficha-sumas-con-dibujos-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:27.970Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-06",
+      "slug": "ficha-sumas-horizontal-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:27.974Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-07",
+      "slug": "ficha-sumas-horizontales-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:27.978Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-08",
+      "slug": "ficha-sumas-con-dibujos-faciles-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:27.982Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-09",
+      "slug": "ficha-sumas-completar-resultados-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:27.986Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-10",
+      "slug": "ficha-sumas-completar-numeros-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:27.990Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-11",
+      "slug": "ficha-sumas-juego-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:27.994Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-12",
+      "slug": "ficha-sumas-rapidas-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:27.998Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-13",
+      "slug": "ficha-sumas-con-objetos-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:28.002Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-14",
+      "slug": "ficha-sumas-de-dos-numeros-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:28.005Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-15",
+      "slug": "ficha-sumas-faciles-para-imprimir-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:28.010Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-16",
+      "slug": "ficha-sumas-con-resultados-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:28.014Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-17",
+      "slug": "ficha-sumas-basicas-para-ninos-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:28.019Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-18",
+      "slug": "ficha-sumas-para-practicar-en-casa-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:28.022Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-19",
+      "slug": "ficha-sumas-numeros-pequenos-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:28.026Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-20",
+      "slug": "ficha-sumas-ejercicios-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:28.029Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-21",
+      "slug": "ficha-sumas-para-imprimir-pdf-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:28.033Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-22",
+      "slug": "ficha-sumas-actividades-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:28.037Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-23",
+      "slug": "ficha-sumas-sencillas-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:28.040Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-24",
+      "slug": "ficha-sumas-nivel-inicial-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:28.043Z"
+    },
+    {
+      "assetId": "asset-1p-sumas-ficha-25",
+      "slug": "ficha-sumas-ejercicios-basicos-1-primaria",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:28.047Z"
+    },
+    {
+      "assetId": "asset-2p-restas-ficha-22",
+      "slug": "ficha-restas-actividades-2-primaria",
+      "status": "draft"
+    },
+    {
+      "assetId": "asset-2p-sumas-ficha-01",
+      "slug": "ficha-sumas-2-primaria-para-imprimir-pdf",
+      "status": "seo-optimized",
+      "updatedAt": "2026-04-04T03:39:47.151Z"
+    }
+  ]
 }

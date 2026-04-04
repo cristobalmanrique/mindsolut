@@ -1,203 +1,306 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { assets as initialAssets } from "@/data/assets";
+import { assets } from "@/data/assets";
+import { topics } from "@/data/topics";
 import { statusList } from "@/data/status";
-import { changeStatus, getNextStatuses } from "@/lib/editorial";
-import type { AssetItem, StatusKey } from "@/types/content";
+import { getNextStatus, getPreviousStatus } from "@/lib/editorial";
 
-type PersistedStatusMap = Record<string, StatusKey>;
+type StatusMap = Record<string, string>;
 
 export default function EditorialPanel() {
-  const [items, setItems] = useState<AssetItem[]>(initialAssets);
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(true);
+  const [statusMap, setStatusMap] = useState<StatusMap>({});
+  const [loading, setLoading] = useState(true);
+  const [selectedTopicId, setSelectedTopicId] = useState("");
+  const [showTable, setShowTable] = useState(false);
+  const [updatingAssetId, setUpdatingAssetId] = useState<string | null>(null);
 
-  const statusMap = useMemo(() => {
-    return Object.fromEntries(statusList.map((status) => [status.key, status]));
+  const availableTopics = useMemo(() => {
+    return topics.filter((topic) =>
+      assets.some((asset) => asset.topicId === topic.id)
+    );
   }, []);
 
+  const selectedTopic = useMemo(() => {
+    return availableTopics.find((topic) => topic.id === selectedTopicId) ?? null;
+  }, [availableTopics, selectedTopicId]);
+
+  const topicAssets = useMemo(() => {
+    if (!selectedTopicId) {
+      return [];
+    }
+
+    return assets
+      .filter((asset) => asset.topicId === selectedTopicId)
+      .sort((a, b) => a.title.localeCompare(b.title, "es"));
+  }, [selectedTopicId]);
+
   useEffect(() => {
-    const loadPersistedStatuses = async () => {
+    if (!selectedTopicId && availableTopics.length > 0) {
+      setSelectedTopicId(availableTopics[0].id);
+    }
+  }, [availableTopics, selectedTopicId]);
+
+  useEffect(() => {
+    async function loadStatuses() {
       try {
-        setLoading(true);
-        setError("");
-
-        const response = await fetch("/api/admin/assets-status");
-        const rawText = await response.text();
-
-let result: any;
-try {
-  result = JSON.parse(rawText);
-} catch {
-  throw new Error(
-    `La API no devolvió JSON válido. Respuesta recibida: ${rawText.slice(0, 200)}`
-  );
-}
-
-        if (!response.ok) {
-          throw new Error(result?.message ?? "Error al cargar estados");
-        }
-
-        const persistedMap: PersistedStatusMap = result?.data ?? {};
-
-        const merged = initialAssets.map((asset) => ({
-          ...asset,
-          status: persistedMap[asset.id] ?? asset.status,
-        }));
-
-        setItems(merged);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error desconocido");
+        const response = await fetch("/api/admin/assets-status", {
+          method: "GET",
+          cache: "no-store",
+        });
+        const json = await response.json();
+        setStatusMap(json.data || {});
+      } catch (error) {
+        console.error(error);
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    loadPersistedStatuses();
+    void loadStatuses();
   }, []);
 
-  const handleChangeStatus = async (assetId: string, newStatus: StatusKey) => {
-  setError("");
+  async function updateStatus(assetId: string, newStatus: string) {
+    const previousStatus = statusMap[assetId] || "draft";
 
-  const previousItems = items;
+    setUpdatingAssetId(assetId);
 
-  try {
-    const optimisticItems = items.map((asset) =>
-      asset.id === assetId ? changeStatus(asset, newStatus) : asset
-    );
+    setStatusMap((prev) => ({
+      ...prev,
+      [assetId]: newStatus,
+    }));
 
-    setItems(optimisticItems);
-
-    const response = await fetch("/api/admin/update-asset-status", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        assetId,
-        newStatus,
-      }),
-    });
-
-    const rawText = await response.text();
-
-    let result: any;
     try {
-      result = JSON.parse(rawText);
-    } catch {
-      throw new Error(
-        `La API no devolvió JSON válido. Respuesta: ${rawText.slice(0, 200)}`
+      const response = await fetch("/api/admin/update-asset-status", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+        body: JSON.stringify({ assetId, newStatus }),
+      });
+
+      const json = await response.json();
+
+      if (!response.ok || !json.ok) {
+        throw new Error(json.message || "No se pudo actualizar el estado.");
+      }
+
+      if (json.data && typeof json.data === "object") {
+        setStatusMap(json.data);
+      }
+    } catch (error) {
+      setStatusMap((prev) => ({
+        ...prev,
+        [assetId]: previousStatus,
+      }));
+
+      console.error(error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Ocurrió un error al actualizar el estado."
       );
+    } finally {
+      setUpdatingAssetId(null);
     }
-
-    if (!response.ok) {
-      throw new Error(result?.message ?? "No se pudo guardar el estado.");
-    }
-  } catch (err) {
-    setItems(previousItems);
-    setError(err instanceof Error ? err.message : "Error desconocido");
   }
-};
 
+  function getStatusLabel(statusKey: string | null) {
+    if (!statusKey) {
+      return null;
+    }
+
+    return statusList.find((status) => status.key === statusKey)?.label ?? statusKey;
+  }
+
+  function handleManageStatesClick(
+    event: React.MouseEvent<HTMLButtonElement>
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+    setShowTable(true);
+  }
+
+  function handleStatusChangeClick(
+    event: React.MouseEvent<HTMLButtonElement>,
+    assetId: string,
+    newStatus: string | null
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!newStatus) {
+      return;
+    }
+
+    void updateStatus(assetId, newStatus);
+  }
+
+  if (loading) {
+    return (
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 px-5 py-4">
+        <p className="text-sm text-slate-300">Cargando estados editoriales...</p>
+      </div>
+    );
+  }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-white">Panel editorial base</h2>
-        <p className="mt-2 max-w-3xl text-sm text-slate-400">
-          Vista mínima para validar el flujo editorial de los assets.
-          Esta versión ya persiste estados en un archivo JSON interno.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <section className="rounded-2xl border border-slate-800 bg-slate-900 px-5 py-5">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div className="space-y-2">
+            <label
+              htmlFor="topic-selector"
+              className="text-sm font-medium text-slate-200"
+            >
+              Topic
+            </label>
 
-      {error ? (
-        <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-          {error}
+            <select
+              id="topic-selector"
+              value={selectedTopicId}
+              onChange={(event) => {
+                setSelectedTopicId(event.target.value);
+                setShowTable(false);
+              }}
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-500"
+            >
+              {availableTopics.map((topic) => (
+                <option key={topic.id} value={topic.id}>
+                  {topic.title}
+                </option>
+              ))}
+            </select>
+
+            {selectedTopic ? (
+              <p className="text-sm text-slate-400">{selectedTopic.description}</p>
+            ) : null}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleManageStatesClick}
+            disabled={!selectedTopicId}
+            className="inline-flex items-center justify-center rounded-xl bg-cyan-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Gestionar estados
+          </button>
         </div>
-      ) : null}
+      </section>
 
-      {loading ? (
-        <div className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-6 text-sm text-slate-300">
-          Cargando estados editoriales...
-        </div>
-      ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900">
-          <table className="min-w-full border-collapse">
-            <thead>
-              <tr className="border-b border-slate-800 bg-slate-950">
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-200">
-                  Título
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-200">
-                  Tipo
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-200">
-                  Topic
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-200">
-                  Estado actual
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-200">
-                  Siguiente estado
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((asset) => {
-                const nextStatuses = getNextStatuses(asset.status);
+      {showTable && selectedTopic ? (
+        <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+          <div className="border-b border-slate-800 px-5 py-4">
+            <h2 className="text-lg font-semibold text-white">{selectedTopic.title}</h2>
+            <p className="mt-1 text-sm text-slate-400">
+              {topicAssets.length} asset{topicAssets.length === 1 ? "" : "s"} en este
+              topic
+            </p>
+          </div>
 
-                return (
-                  <tr
-                    key={asset.id}
-                    className="border-b border-slate-800/80 align-top"
-                  >
-                    <td className="px-4 py-4 text-sm text-white">
-                      <div className="font-medium">{asset.title}</div>
-                      <div className="mt-1 text-xs text-slate-400">
-                        {asset.slug}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-slate-300">
-                      {asset.type}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-slate-300">
-                      {asset.topicId}
-                    </td>
-                    <td className="px-4 py-4 text-sm">
-                      <span className="rounded-full border border-slate-700 px-2 py-1 text-xs text-slate-200">
-                        {statusMap[asset.status]?.label ?? asset.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-slate-300">
-                      {nextStatuses.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {nextStatuses.map((status) => (
-                            <button
-                              key={status}
-                              type="button"
-                              onClick={() =>
-                                handleChangeStatus(asset.id, status)
-                              }
-                              className="rounded-lg bg-cyan-500 px-3 py-2 text-xs font-semibold text-slate-950 transition hover:bg-cyan-400"
-                            >
-                              Mover a {statusMap[status]?.label ?? status}
-                            </button>
-                          ))}
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-800">
+              <thead className="bg-slate-950/60">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    Asset
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    Estado actual
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    Mover estado
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-slate-800">
+                {topicAssets.map((asset) => {
+                  const currentStatus = statusMap[asset.id] || "draft";
+                  const previousStatus = getPreviousStatus(currentStatus);
+                  const nextStatus = getNextStatus(currentStatus);
+                  const currentStatusLabel = getStatusLabel(currentStatus);
+                  const previousStatusLabel = getStatusLabel(previousStatus);
+                  const nextStatusLabel = getStatusLabel(nextStatus);
+                  const isUpdating = updatingAssetId === asset.id;
+
+                  return (
+                    <tr key={asset.id} className="align-top">
+                      <td className="px-4 py-4">
+                        <div>
+                          <p className="text-sm font-semibold text-white">
+                            {asset.title}
+                          </p>
+
+                          {asset.description ? (
+                            <p className="mt-1 max-w-xl text-sm text-slate-400">
+                              {asset.description}
+                            </p>
+                          ) : null}
+
+                          <p className="mt-2 text-xs text-slate-500">{asset.slug}</p>
                         </div>
-                      ) : (
-                        <span className="text-xs text-slate-500">
-                          Sin transición disponible
+                      </td>
+
+                      <td className="px-4 py-4">
+                        <span className="inline-flex rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-sm font-medium text-slate-200">
+                          {currentStatusLabel}
                         </span>
-                      )}
+                      </td>
+
+                      <td className="px-4 py-4">
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            disabled={!previousStatus || isUpdating}
+                            onClick={(event) =>
+                              handleStatusChangeClick(event, asset.id, previousStatus)
+                            }
+                            className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            {previousStatusLabel
+                              ? `Anterior: ${previousStatusLabel}`
+                              : "Anterior"}
+                          </button>
+
+                          <button
+                            type="button"
+                            disabled={!nextStatus || isUpdating}
+                            onClick={(event) =>
+                              handleStatusChangeClick(event, asset.id, nextStatus)
+                            }
+                            className="inline-flex items-center rounded-lg bg-cyan-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            {nextStatusLabel
+                              ? `Siguiente: ${nextStatusLabel}`
+                              : "Siguiente"}
+                          </button>
+                        </div>
+
+                        {isUpdating ? (
+                          <p className="mt-2 text-xs text-cyan-400">Actualizando...</p>
+                        ) : null}
+                      </td>
+                    </tr>
+                  );
+                })}
+
+                {topicAssets.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={3}
+                      className="px-4 py-8 text-center text-sm text-slate-400"
+                    >
+                      No hay assets asociados a este topic.
                     </td>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </section>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
+    </div>
   );
 }

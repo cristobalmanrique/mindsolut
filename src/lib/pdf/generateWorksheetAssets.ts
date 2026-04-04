@@ -1,21 +1,13 @@
-import fs from "fs";
-import path from "path";
 import puppeteer from "puppeteer";
 import type { AssetItem } from "@/types/content";
 import type { MathOperation } from "@/lib/pdf/types";
 import { buildExerciseSet } from "@/lib/pdf/buildExerciseSet";
+import {
+  ensureEditorialStorageDirs,
+  getDraftPdfAbsolutePath,
+  getStoragePreviewAbsolutePath,
+} from "@/lib/editorial/assetStorage";
 import { renderWorksheetHtml } from "@/lib/pdf/templates/renderWorksheetHtml";
-
-function ensureDir(dirPath: string) {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-  }
-}
-
-function getPublicAbsolutePath(relativePublicPath: string): string {
-  const cleanPath = relativePublicPath.replace(/^\/+/, "");
-  return path.join(process.cwd(), "public", cleanPath);
-}
 
 export async function generateWorksheetAssets(
   asset: AssetItem,
@@ -24,17 +16,17 @@ export async function generateWorksheetAssets(
   pdfPath: string;
   previewPath: string;
 }> {
-  const pdfPath = getPublicAbsolutePath(asset.fileUrl);
-  const previewPath = getPublicAbsolutePath(asset.previewImage);
+  ensureEditorialStorageDirs();
 
-  ensureDir(path.dirname(pdfPath));
-  ensureDir(path.dirname(previewPath));
+  const pdfPath = getDraftPdfAbsolutePath(asset);
+  const previewPath = getStoragePreviewAbsolutePath(asset);
 
   const worksheet = buildExerciseSet(asset, operation);
   const html = renderWorksheetHtml(asset, worksheet);
 
   const browser = await puppeteer.launch({
     headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
   try {

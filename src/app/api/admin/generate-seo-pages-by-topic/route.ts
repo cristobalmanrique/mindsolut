@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { assets } from "@/data/assets";
 import { generateSeoPayload } from "@/lib/seo/generateSeoPayload";
 import {
-  writeSeoPage,
-  updateAssetStatus,
-  readPersistedStatuses,
-} from "@/lib/seo/seoStorage";
+  getAssetEditorialStatus,
+  updateAssetEditorialStatus,
+} from "@/lib/editorial/editorialStatus";
+import { writeSeoPage } from "@/lib/seo/seoStorage";
 
 export const runtime = "nodejs";
 
@@ -35,15 +35,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const persistedStatuses = readPersistedStatuses();
-
     const topicAssets = assets.filter((asset) => {
-      const effectiveStatus = persistedStatuses[asset.id] ?? asset.status;
+      const effectiveStatus = getAssetEditorialStatus(asset);
 
       return (
         asset.topicId === topicId &&
         asset.type === "worksheet" &&
-        effectiveStatus === "seo-optimized"
+        effectiveStatus === "review"
       );
     });
 
@@ -51,7 +49,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           ok: false,
-          message: `No se encontraron assets en estado seo-optimized para ${topicId}.`,
+          message: `No se encontraron assets en estado review para ${topicId}.`,
           generatedCount: 0,
           skippedCount: 0,
           failedCount: 0,
@@ -72,7 +70,7 @@ export async function POST(request: NextRequest) {
         if (!asset.fileUrl || !asset.previewImage) {
           skipped.push({
             file: asset.slug,
-            reason: "El asset no tiene fileUrl o previewImage",
+            reason: "El asset no tiene fileUrl o previewImage.",
           });
           continue;
         }
@@ -80,7 +78,7 @@ export async function POST(request: NextRequest) {
         const payload = generateSeoPayload(asset);
         writeSeoPage(asset.slug, payload);
 
-        updateAssetStatus(asset.id, "ready");
+        updateAssetEditorialStatus(asset, "seo-optimized");
 
         generated.push({
           file: `storage/seo/pages/${asset.slug}.json`,
@@ -102,7 +100,7 @@ export async function POST(request: NextRequest) {
       generated,
       skipped,
       failed,
-      message: `Generación SEO completada para ${topicId}. Los assets generados fueron movidos a ready.`,
+      message: `Generación SEO completada para ${topicId}. Los assets generados fueron actualizados a seo-optimized.`,
     });
   } catch (error) {
     return NextResponse.json(

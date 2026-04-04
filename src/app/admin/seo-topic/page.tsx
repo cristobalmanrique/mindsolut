@@ -73,7 +73,9 @@ export default function AdminSeoByTopicPage() {
       <div className="rounded-2xl border border-slate-800 bg-slate-900 px-5 py-4">
         <h3 className="text-lg font-semibold text-white">Páginas SEO por topic</h3>
         <p className="mt-2 text-sm text-slate-400">
-          Genera los payloads SEO para los slugs de un topic. Solo procesa assets en estado seo-optimized y, al terminar, los mueve a ready.
+          Genera los payloads SEO para los assets de un topic que estén en estado
+          review. Al generarlos correctamente, los actualiza a seo-optimized. No
+          publica PDFs ni previews en esta etapa.
         </p>
       </div>
 

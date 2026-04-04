@@ -1,32 +1,11 @@
-import fs from "fs";
-import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 import { assets } from "@/data/assets";
 import { statusList } from "@/data/status";
-
-const STATUS_FILE = path.join(
-  process.cwd(),
-  "storage",
-  "editorial",
-  "assets-status.json"
-);
-
-function ensureStatusFile() {
-  const dir = path.dirname(STATUS_FILE);
-
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-
-  if (!fs.existsSync(STATUS_FILE)) {
-    fs.writeFileSync(STATUS_FILE, "{}", "utf-8");
-  }
-}
+import { transitionAssetEditorialStatus } from "@/lib/editorial/assetWorkflow";
+import { getEditorialStatusResponseMap } from "@/lib/editorial/editorialStatus";
 
 export async function POST(request: NextRequest) {
   try {
-    ensureStatusFile();
-
     const body = await request.json();
     const assetId = body?.assetId;
     const newStatus = body?.newStatus;
@@ -51,8 +30,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const assetExists = assets.some((asset) => asset.id === assetId);
-    if (!assetExists) {
+    const asset = assets.find((item) => item.id === assetId);
+
+    if (!asset) {
       return NextResponse.json(
         {
           ok: false,
@@ -63,6 +43,7 @@ export async function POST(request: NextRequest) {
     }
 
     const statusExists = statusList.some((status) => status.key === newStatus);
+
     if (!statusExists) {
       return NextResponse.json(
         {
@@ -73,19 +54,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const raw = fs.readFileSync(STATUS_FILE, "utf-8");
-    const data = JSON.parse(raw);
+    const result = await transitionAssetEditorialStatus(asset, newStatus);
+    const statusMap = getEditorialStatusResponseMap();
 
-    data[assetId] = newStatus;
-
-    fs.writeFileSync(STATUS_FILE, JSON.stringify(data, null, 2), "utf-8");
-
-    return NextResponse.json({
-      ok: true,
-      assetId,
-      newStatus,
-      message: "Estado actualizado correctamente.",
-    });
+    return NextResponse.json(
+      {
+        ok: true,
+        assetId,
+        previousStatus: result.previousStatus,
+        newStatus: result.nextStatus,
+        message: "Estado actualizado correctamente.",
+        files: result.files,
+        data: statusMap,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        },
+      }
+    );
   } catch (error) {
     return NextResponse.json(
       {
