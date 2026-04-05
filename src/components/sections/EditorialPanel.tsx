@@ -25,6 +25,10 @@ export default function EditorialPanel() {
     return availableTopics.find((topic) => topic.id === selectedTopicId) ?? null;
   }, [availableTopics, selectedTopicId]);
 
+  const statusOrderMap = useMemo(() => {
+    return new Map(statusList.map((status, index) => [status.key, index]));
+  }, []);
+
   const topicAssets = useMemo(() => {
     if (!selectedTopicId) {
       return [];
@@ -32,8 +36,19 @@ export default function EditorialPanel() {
 
     return assets
       .filter((asset) => asset.topicId === selectedTopicId)
-      .sort((a, b) => a.title.localeCompare(b.title, "es"));
-  }, [selectedTopicId]);
+      .sort((a, b) => {
+        const statusA = statusMap[a.id] || "draft";
+        const statusB = statusMap[b.id] || "draft";
+        const orderA = statusOrderMap.get(statusA) ?? Number.MAX_SAFE_INTEGER;
+        const orderB = statusOrderMap.get(statusB) ?? Number.MAX_SAFE_INTEGER;
+
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+
+        return a.title.localeCompare(b.title, "es");
+      });
+  }, [selectedTopicId, statusMap, statusOrderMap]);
 
   useEffect(() => {
     if (!selectedTopicId && availableTopics.length > 0) {

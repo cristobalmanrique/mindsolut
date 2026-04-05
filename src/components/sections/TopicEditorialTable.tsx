@@ -25,11 +25,26 @@ export default function TopicEditorialTable({
     [topicId]
   );
 
+  const statusOrderMap = useMemo(() => {
+    return new Map(statusList.map((status, index) => [status.key, index]));
+  }, []);
+
   const topicAssets = useMemo(() => {
     return assets
       .filter((asset) => asset.topicId === topicId)
-      .sort((a, b) => a.title.localeCompare(b.title, "es"));
-  }, [topicId]);
+      .sort((a, b) => {
+        const statusA = statusMap[a.id] || "draft";
+        const statusB = statusMap[b.id] || "draft";
+        const orderA = statusOrderMap.get(statusA) ?? Number.MAX_SAFE_INTEGER;
+        const orderB = statusOrderMap.get(statusB) ?? Number.MAX_SAFE_INTEGER;
+
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+
+        return a.title.localeCompare(b.title, "es");
+      });
+  }, [topicId, statusMap, statusOrderMap]);
 
   useEffect(() => {
     async function loadStatuses() {
@@ -213,8 +228,8 @@ export default function TopicEditorialTable({
                             className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             {previousStatusLabel
-                              ? `Ant: ${previousStatusLabel}`
-                              : "Ant"}
+                              ? `Anterior: ${previousStatusLabel}`
+                              : "Anterior"}
                           </button>
 
                           <button
@@ -228,8 +243,8 @@ export default function TopicEditorialTable({
                             className="inline-flex items-center rounded-lg bg-cyan-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             {nextStatusLabel
-                              ? `Sig: ${nextStatusLabel}`
-                              : "Sig"}
+                              ? `Siguiente: ${nextStatusLabel}`
+                              : "Siguiente"}
                           </button>
                         </div>
 

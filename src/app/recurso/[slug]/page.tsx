@@ -6,9 +6,9 @@ import { notFound } from "next/navigation";
 import { getPublicAssetBySlug, getPublicAssets } from "@/lib/content/publicIndex";
 
 type ResourcePageProps = {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 };
 
 type SeoPayload = {
@@ -57,13 +57,14 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: ResourcePageProps) {
-  const publicAsset = getPublicAssetBySlug(params.slug);
+  const { slug } = await params;
+  const publicAsset = getPublicAssetBySlug(slug);
 
   if (!publicAsset) {
     return {};
   }
 
-  const payload = readSeoPayload(params.slug);
+  const payload = readSeoPayload(slug);
 
   if (!payload) {
     return {
@@ -102,13 +103,14 @@ export async function generateMetadata({ params }: ResourcePageProps) {
 }
 
 export default async function ResourcePage({ params }: ResourcePageProps) {
-  const publicAsset = getPublicAssetBySlug(params.slug);
+  const { slug } = await params;
+  const publicAsset = getPublicAssetBySlug(slug);
 
   if (!publicAsset) {
     notFound();
   }
 
-  const payload = readSeoPayload(params.slug);
+  const payload = readSeoPayload(slug);
 
   if (!payload) {
     notFound();
