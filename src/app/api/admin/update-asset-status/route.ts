@@ -3,6 +3,7 @@ import { assets } from "@/data/assets";
 import { statusList } from "@/data/status";
 import { transitionAssetEditorialStatus } from "@/lib/editorial/assetWorkflow";
 import { getEditorialStatusResponseMap } from "@/lib/editorial/editorialStatus";
+import type { EditorialAssetStatus } from "@/lib/editorial/editorialStatus";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,11 +21,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!newStatus || typeof newStatus !== "string") {
+    if (!newStatus || typeof newStatus !== "string" || !statusList.some((status) => status.key === newStatus)) {
       return NextResponse.json(
         {
           ok: false,
-          message: "newStatus es obligatorio.",
+          message: `El estado ${newStatus} no es válido.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Asegurando que `newStatus` sea un valor válido de EditorialAssetStatus
+    const validStatuses: EditorialAssetStatus[] = ["draft", "review", "ready"]; // Enum de posibles valores de status
+    if (!validStatuses.includes(newStatus as EditorialAssetStatus)) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: `El estado ${newStatus} no es válido.`,
         },
         { status: 400 }
       );
@@ -39,18 +52,6 @@ export async function POST(request: NextRequest) {
           message: `No existe un asset con id ${assetId}.`,
         },
         { status: 404 }
-      );
-    }
-
-    const statusExists = statusList.some((status) => status.key === newStatus);
-
-    if (!statusExists) {
-      return NextResponse.json(
-        {
-          ok: false,
-          message: `El estado ${newStatus} no es válido.`,
-        },
-        { status: 400 }
       );
     }
 
