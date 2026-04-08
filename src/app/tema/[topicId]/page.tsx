@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { topics } from "@/data/topics";
-import { getPublicAssetsByTopic, getPublicTopics } from "@/lib/seo/publicIndex";
+import { getPublicAssetsByTopic } from "@/lib/seo/publicIndex";
 
 type TopicPageProps = {
   params: Promise<{
@@ -11,7 +11,7 @@ type TopicPageProps = {
 };
 
 export async function generateStaticParams() {
-  return getPublicTopics().map((topic) => ({
+  return topics.map((topic) => ({
     topicId: topic.id,
   }));
 }
@@ -23,10 +23,9 @@ export async function generateMetadata({ params }: TopicPageProps) {
   if (!topic) return {};
 
   return {
-    title: `${topic.title} | Recursos imprimibles | Mindsolut`,
+    title: `${topic.title} | Fichas educativas | Mindsolut`,
     description:
-      topic.description ||
-      `Explora recursos imprimibles del tema ${topic.title}.`,
+      topic.description || `Explora las fichas educativas del topic ${topic.title}.`,
   };
 }
 
@@ -48,7 +47,7 @@ export default async function TopicPage({ params }: TopicPageProps) {
             href="/"
             className="text-sm font-semibold text-cyan-700 hover:text-cyan-800"
           >
-            ← Volver al inicio
+            ← Volver a topics
           </Link>
 
           <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
@@ -72,6 +71,7 @@ export default async function TopicPage({ params }: TopicPageProps) {
                     src={asset.previewImage}
                     alt={asset.title}
                     fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover"
                   />
                 </div>
@@ -93,7 +93,7 @@ export default async function TopicPage({ params }: TopicPageProps) {
                     href={`/recurso/${asset.slug}`}
                     className="inline-flex items-center text-sm font-semibold text-cyan-700 hover:text-cyan-800"
                   >
-                    Ver recurso →
+                    Ver ficha →
                   </Link>
                 </div>
               </div>

@@ -1,18 +1,30 @@
+import { topics } from "@/data/topics";
 import type { AssetItem } from "@/types/content";
 
-function buildSeoTitle(asset: AssetItem) {
+function getTopicData(topicId: string) {
+  return topics.find((topic) => topic.id === topicId) ?? null;
+}
+
+function getReadableGrade(asset: AssetItem) {
+  const topic = getTopicData(asset.topicId);
+  return topic?.grade ?? "primaria";
+}
+
+export function buildSeoTitle(asset: AssetItem) {
   return `${asset.title} para imprimir en PDF | Mindsolut`;
 }
 
-function buildSeoDescription(asset: AssetItem) {
+export function buildSeoDescription(asset: AssetItem) {
   return (
     asset.description ||
     `Descarga ${asset.title.toLowerCase()} en PDF listo para imprimir y practicar.`
   );
 }
 
-function buildIntro(asset: AssetItem) {
-  return `Esta ficha de ${asset.title.toLowerCase()} está pensada para estudiantes de ${asset.language === "es" ? asset.topicId : asset.topicId}, en formato PDF imprimible y con una estructura clara para practicar en casa o en el aula.`;
+export function buildIntro(asset: AssetItem) {
+  const grade = getReadableGrade(asset);
+
+  return `Esta ficha está pensada para estudiantes de ${grade}, en formato PDF imprimible y con una estructura clara para practicar en casa o en el aula.`;
 }
 
 function buildBenefits(asset: AssetItem) {

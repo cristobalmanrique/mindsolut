@@ -5,7 +5,7 @@ import Footer from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
   title: "Mindsolut",
-  description: "Herramientas y recursos para resolver, practicar y aprender.",
+  description: "Fichas educativas de primaria organizadas por topic.",
 };
 
 export default function RootLayout({

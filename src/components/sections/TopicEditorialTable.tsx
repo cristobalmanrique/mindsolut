@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { assets } from "@/data/assets";
+import { assets as initialAssets } from "@/data/assets";
 import { topics } from "@/data/topics";
 import { statusList } from "@/data/status";
-import { getNextStatus, getPreviousStatus } from "@/lib/editorial";
+import { getNextStatus, getPreviousStatus, getStatusIndex } from "@/lib/editorial";
 
 type StatusMap = Record<string, string>;
 
@@ -19,32 +19,29 @@ export default function TopicEditorialTable({
   const [statusMap, setStatusMap] = useState<StatusMap>({});
   const [loading, setLoading] = useState(true);
   const [updatingAssetId, setUpdatingAssetId] = useState<string | null>(null);
+  const [deletingAssetId, setDeletingAssetId] = useState<string | null>(null);
+  const [topicAssets, setTopicAssets] = useState(() =>
+    initialAssets.filter((asset) => asset.topicId === topicId)
+  );
 
   const topic = useMemo(
     () => topics.find((item) => item.id === topicId) ?? null,
     [topicId]
   );
 
-  const statusOrderMap = useMemo(() => {
-    return new Map(statusList.map((status, index) => [status.key, index]));
-  }, []);
+  const sortedTopicAssets = useMemo(() => {
+    return [...topicAssets].sort((a, b) => {
+      const statusA = statusMap[a.id] || "draft";
+      const statusB = statusMap[b.id] || "draft";
+      const statusDiff = getStatusIndex(statusA) - getStatusIndex(statusB);
 
-  const topicAssets = useMemo(() => {
-    return assets
-      .filter((asset) => asset.topicId === topicId)
-      .sort((a, b) => {
-        const statusA = statusMap[a.id] || "draft";
-        const statusB = statusMap[b.id] || "draft";
-        const orderA = statusOrderMap.get(statusA) ?? Number.MAX_SAFE_INTEGER;
-        const orderB = statusOrderMap.get(statusB) ?? Number.MAX_SAFE_INTEGER;
+      if (statusDiff !== 0) {
+        return statusDiff;
+      }
 
-        if (orderA !== orderB) {
-          return orderA - orderB;
-        }
-
-        return a.title.localeCompare(b.title, "es");
-      });
-  }, [topicId, statusMap, statusOrderMap]);
+      return a.title.localeCompare(b.title, "es");
+    });
+  }, [statusMap, topicAssets]);
 
   useEffect(() => {
     async function loadStatuses() {
@@ -117,6 +114,57 @@ export default function TopicEditorialTable({
     }
   }
 
+  async function deleteAsset(assetId: string) {
+    const asset = topicAssets.find((item) => item.id === assetId);
+
+    if (!asset) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Se eliminará el asset "${asset.title}" y sus archivos asociados.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingAssetId(assetId);
+
+    try {
+      const response = await fetch("/api/admin/delete-asset", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+        body: JSON.stringify({ assetId }),
+      });
+
+      const json = await response.json();
+
+      if (!response.ok || !json.ok) {
+        throw new Error(json.message || "No se pudo eliminar el asset.");
+      }
+
+      setTopicAssets((prev) => prev.filter((item) => item.id !== assetId));
+      setStatusMap((prev) => {
+        const next = { ...prev };
+        delete next[assetId];
+        return next;
+      });
+    } catch (error) {
+      console.error(error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Ocurrió un error al eliminar el asset."
+      );
+    } finally {
+      setDeletingAssetId(null);
+    }
+  }
+
   if (!topic) {
     return (
       <div className="rounded-2xl border border-red-900 bg-red-950/40 px-5 py-4">
@@ -140,7 +188,7 @@ export default function TopicEditorialTable({
           <h1 className="text-lg font-semibold text-white">{topic.title}</h1>
           <p className="mt-2 text-sm text-slate-400">{topic.description}</p>
           <p className="mt-2 text-xs text-slate-500">
-            {topicAssets.length} asset{topicAssets.length === 1 ? "" : "s"}
+            {sortedTopicAssets.length} asset{sortedTopicAssets.length === 1 ? "" : "s"}
           </p>
         </div>
 
@@ -166,6 +214,9 @@ export default function TopicEditorialTable({
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
                   Mover estado
                 </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Acción
+                </th>
               </tr>
             </thead>
 
@@ -173,7 +224,7 @@ export default function TopicEditorialTable({
               {loading ? (
                 <tr>
                   <td
-                    colSpan={3}
+                    colSpan={4}
                     className="px-4 py-8 text-center text-sm text-slate-400"
                   >
                     Cargando estados editoriales...
@@ -182,7 +233,7 @@ export default function TopicEditorialTable({
               ) : null}
 
               {!loading &&
-                topicAssets.map((asset) => {
+                sortedTopicAssets.map((asset) => {
                   const currentStatus = statusMap[asset.id] || "draft";
                   const previousStatus = getPreviousStatus(currentStatus);
                   const nextStatus = getNextStatus(currentStatus);
@@ -190,6 +241,7 @@ export default function TopicEditorialTable({
                   const currentStatusLabel = getStatusLabel(currentStatus);
                   const nextStatusLabel = getStatusLabel(nextStatus);
                   const isUpdating = updatingAssetId === asset.id;
+                  const isDeleting = deletingAssetId === asset.id;
 
                   return (
                     <tr key={asset.id} className="align-top">
@@ -219,7 +271,7 @@ export default function TopicEditorialTable({
                         <div className="flex flex-wrap gap-2">
                           <button
                             type="button"
-                            disabled={!previousStatus || isUpdating}
+                            disabled={!previousStatus || isUpdating || isDeleting}
                             onClick={() => {
                               if (previousStatus) {
                                 void updateStatus(asset.id, previousStatus);
@@ -234,7 +286,7 @@ export default function TopicEditorialTable({
 
                           <button
                             type="button"
-                            disabled={!nextStatus || isUpdating}
+                            disabled={!nextStatus || isUpdating || isDeleting}
                             onClick={() => {
                               if (nextStatus) {
                                 void updateStatus(asset.id, nextStatus);
@@ -252,14 +304,25 @@ export default function TopicEditorialTable({
                           <p className="mt-2 text-xs text-cyan-400">Actualizando...</p>
                         ) : null}
                       </td>
+
+                      <td className="px-4 py-4">
+                        <button
+                          type="button"
+                          disabled={isUpdating || isDeleting}
+                          onClick={() => void deleteAsset(asset.id)}
+                          className="inline-flex items-center rounded-lg border border-red-800 bg-red-950/50 px-3 py-2 text-sm font-medium text-red-200 transition hover:bg-red-900/60 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          {isDeleting ? "Eliminando..." : "Borrar asset"}
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
 
-              {!loading && topicAssets.length === 0 ? (
+              {!loading && sortedTopicAssets.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={3}
+                    colSpan={4}
                     className="px-4 py-8 text-center text-sm text-slate-400"
                   >
                     No hay assets asociados a este topic.

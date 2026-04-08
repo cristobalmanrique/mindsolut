@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { assets } from "@/data/assets";
-import { bundles } from "@/data/bundles";
-import { collections } from "@/data/collections";
-import { pages } from "@/data/pages";
+import { topics } from "@/data/topics";
 import { statusList } from "@/data/status";
 
 function MetricCard({
@@ -24,22 +22,22 @@ function MetricCard({
 }
 
 export default function AdminHomePage() {
-  const publishedAssets = assets.filter((item) => item.status === "published").length;
   const premiumAssets = assets.filter((item) => item.isPremium).length;
+  const readyAssets = assets.filter((item) => item.status === "ready").length;
 
   return (
     <div className="space-y-6">
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard title="Assets" value={assets.length} note="Catálogo actual definido en data/assets.ts" />
-        <MetricCard title="Bundles" value={bundles.length} note="Packs comerciales y estructurados" />
-        <MetricCard title="Collections" value={collections.length} note="Páginas agrupadoras por tema y curso" />
-        <MetricCard title="Pages" value={pages.length} note="Páginas indexables y operativas" />
+        <MetricCard title="Topics" value={topics.length} note="Bloques temáticos activos en el catálogo" />
+        <MetricCard title="Assets" value={assets.length} note="Fichas definidas en data/assets.ts" />
+        <MetricCard title="Assets premium" value={premiumAssets} note="Fichas con valor agregado explícito" />
+        <MetricCard title="Assets listos" value={readyAssets} note="Fichas marcadas como ready" />
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <MetricCard title="Assets premium" value={premiumAssets} note="Activos con valor agregado explícito" />
-        <MetricCard title="Assets publicados" value={publishedAssets} note="Activos visibles al usuario final" />
         <MetricCard title="Estados definidos" value={statusList.length} note="Flujo editorial activo" />
+        <MetricCard title="Topics con assets" value={topics.filter((topic) => assets.some((asset) => asset.topicId === topic.id)).length} note="Topics con contenido asociado" />
+        <MetricCard title="Idioma base" value="ES" note="Catálogo actual enfocado en primaria" />
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
@@ -49,7 +47,7 @@ export default function AdminHomePage() {
         >
           <h3 className="text-lg font-semibold text-white">Panel editorial</h3>
           <p className="mt-2 text-sm text-slate-400">
-            Revisar assets y moverlos entre estados del flujo editorial.
+            Revisar topics, mover estados y borrar assets con sus archivos.
           </p>
         </Link>
 

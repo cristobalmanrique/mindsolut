@@ -3,7 +3,9 @@ import path from "path";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { topics } from "@/data/topics";
 import { getPublicAssetBySlug, getPublicAssets } from "@/lib/content/publicIndex";
+import { buildIntro } from "@/lib/seo/generateSeoPayload";
 
 type ResourcePageProps = {
   params: Promise<{
@@ -116,13 +118,18 @@ export default async function ResourcePage({ params }: ResourcePageProps) {
     notFound();
   }
 
+  const topic = topics.find((item) => item.id === publicAsset.topicId) ?? null;
+  const topicHref = topic ? `/tema/${topic.id}` : "/";
+  const topicLabel = topic?.title ?? "inicio";
+  const introText = buildIntro(publicAsset);
+
   return (
     <main className="bg-slate-50 text-slate-900">
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <section>
             <div className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800">
-              Recurso imprimible
+              Ficha educativa
             </div>
 
             <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
@@ -132,27 +139,6 @@ export default async function ResourcePage({ params }: ResourcePageProps) {
             <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600">
               {payload.seoDescription}
             </p>
-
-            <div className="mt-6 flex flex-wrap gap-3 text-sm text-slate-600">
-              <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
-                Topic: {payload.topicId}
-              </span>
-              <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
-                Idioma: {payload.language.toUpperCase()}
-              </span>
-              <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
-                Formato: PDF imprimible
-              </span>
-              {payload.isPremium ? (
-                <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 font-semibold text-amber-800">
-                  Premium
-                </span>
-              ) : (
-                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-semibold text-emerald-800">
-                  Gratis
-                </span>
-              )}
-            </div>
 
             <div className="mt-8 flex flex-wrap gap-4">
               <Link
@@ -164,21 +150,19 @@ export default async function ResourcePage({ params }: ResourcePageProps) {
               </Link>
 
               <Link
-                href="/"
+                href={topicHref}
                 className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
               >
-                Volver al inicio
+                Volver a {topicLabel}
               </Link>
             </div>
 
             <article className="mt-10 space-y-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <section>
                 <h2 className="text-xl font-bold text-slate-900">
-                  Descripción del recurso
+                  Descripción de la ficha
                 </h2>
-                <p className="mt-3 leading-7 text-slate-700">
-                  {payload.sections.intro}
-                </p>
+                <p className="mt-3 leading-7 text-slate-700">{introText}</p>
               </section>
 
               <section>
@@ -215,9 +199,7 @@ export default async function ResourcePage({ params }: ResourcePageProps) {
 
           <aside>
             <div className="sticky top-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-900">
-                Vista previa
-              </h2>
+              <h2 className="text-lg font-bold text-slate-900">Vista previa</h2>
 
               <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
                 <Image

@@ -151,3 +151,15 @@ export function updateAssetEditorialStatus(
 
   return nextRecord;
 }
+
+export function removeAssetEditorialStatus(assetId: string) {
+  const records = readEditorialStatusRecords();
+  const nextRecords = records.filter((record) => record.assetId !== assetId);
+
+  if (nextRecords.length === records.length) {
+    return false;
+  }
+
+  writeEditorialStatusRecords(nextRecords);
+  return true;
+}

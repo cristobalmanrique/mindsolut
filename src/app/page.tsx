@@ -11,16 +11,16 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <div className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800">
-              Recursos imprimibles
+              Fichas educativas de primaria
             </div>
 
             <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
-              Fichas educativas listas para imprimir
+              Fichas listas para descargar por tema
             </h1>
 
             <p className="mt-5 text-lg leading-8 text-slate-600">
-              Explora recursos de matemáticas para primaria, organizados por
-              tema y preparados para descargar en PDF.
+              Explora las fichas educativas disponibles, organizadas por topic y
+              preparadas para descargar en PDF.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4 text-sm text-slate-600">
@@ -28,7 +28,7 @@ export default function HomePage() {
                 Topics públicos: {publicTopics.length}
               </span>
               <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
-                Recursos públicos: {publicAssets.length}
+                Fichas públicas: {publicAssets.length}
               </span>
             </div>
           </div>
@@ -39,10 +39,10 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-slate-900">
-              Explora por tema
+              Explora por topic
             </h2>
             <p className="mt-2 text-slate-600">
-              Accede a los recursos disponibles por bloque temático.
+              Accede a las fichas disponibles por bloque temático.
             </p>
           </div>
 
@@ -61,7 +61,7 @@ export default function HomePage() {
                     {topic.description}
                   </p>
                   <div className="mt-4 text-sm font-semibold text-cyan-700">
-                    Ver recursos →
+                    Ver fichas →
                   </div>
                 </Link>
               ))}

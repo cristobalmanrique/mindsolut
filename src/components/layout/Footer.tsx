@@ -1,13 +1,6 @@
 import Link from "next/link";
 
-const footerLinks = [
-  { label: "Imprimibles", href: "/imprimibles" },
-  { label: "Generadores", href: "/generadores" },
-  { label: "Recursos educativos", href: "/recursos-educativos" },
-  { label: "Juegos y retos", href: "/juegos-y-retos" },
-  { label: "Contacto", href: "/contact" },
-  { label: "Privacidad", href: "/privacidad" },
-];
+const footerLinks = [{ label: "Inicio", href: "/" }];
 
 export default function Footer() {
   return (
@@ -22,7 +15,7 @@ export default function Footer() {
           </Link>
 
           <p className="mt-4 max-w-md text-sm leading-6 text-slate-400">
-            Herramientas y recursos para resolver, practicar y aprender.
+            Fichas educativas de primaria organizadas por topic.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
@@ -30,7 +23,8 @@ export default function Footer() {
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm text-slate-300 transition hover:text-white">
+              className="text-sm text-slate-300 transition hover:text-white"
+            >
               {item.label}
             </Link>
           ))}
@@ -38,8 +32,8 @@ export default function Footer() {
       </div>
       <div className="border-t border-slate-800">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-sm text-slate-500 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <p>  {new Date().getFullYear()} Mindsolut. Todos los derechos reservados.</p>
-          <p>Producto digital en evoluci n.</p>
+          <p>{new Date().getFullYear()} Mindsolut. Todos los derechos reservados.</p>
+          <p>Fichas educativas en evolución.</p>
         </div>
       </div>
     </footer>
