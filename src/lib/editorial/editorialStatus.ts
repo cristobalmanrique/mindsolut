@@ -4,6 +4,9 @@ import { assets } from "@/data/assets";
 import type { AssetItem } from "@/types/content";
 import type { EditorialAssetStatus } from "./assetStorage";
 
+// Asegurándonos de exportar EditorialAssetStatus correctamente
+export type EditorialAssetStatus = 'draft' | 'review' | 'ready'; 
+
 export type EditorialStatusRecord = {
   assetId: string;
   slug?: string;
