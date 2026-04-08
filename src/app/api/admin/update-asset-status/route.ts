@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
     const result = await transitionAssetEditorialStatus(asset, status);
     const statusMap = getEditorialStatusResponseMap();
 
+    // Ajuste: eliminamos 'files' del retorno
     return NextResponse.json(
       {
         ok: true,
@@ -67,7 +68,6 @@ export async function POST(request: NextRequest) {
         previousStatus: result.previousStatus,
         newStatus: result.nextStatus,
         message: "Estado actualizado correctamente.",
-        files: result.files,
         data: statusMap,
       },
       {
