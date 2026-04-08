@@ -31,8 +31,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Asegurando que `newStatus` sea un valor válido de EditorialAssetStatus
-    const validStatuses: EditorialAssetStatus[] = ["draft", "review", "ready"]; // Enum de posibles valores de status
+    // Convertir newStatus a EditorialAssetStatus
+    const validStatuses: EditorialAssetStatus[] = ["draft", "review", "ready"];
     if (!validStatuses.includes(newStatus as EditorialAssetStatus)) {
       return NextResponse.json(
         {
@@ -55,7 +55,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await transitionAssetEditorialStatus(asset, newStatus);
+    // Forzar la conversión de newStatus a EditorialAssetStatus
+    const status: EditorialAssetStatus = newStatus as EditorialAssetStatus;
+    const result = await transitionAssetEditorialStatus(asset, status);
     const statusMap = getEditorialStatusResponseMap();
 
     return NextResponse.json(
