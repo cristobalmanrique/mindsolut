@@ -3,7 +3,7 @@ import { assets } from "@/data/assets";
 import { statusList } from "@/data/status";
 import { transitionAssetEditorialStatus } from "@/lib/editorial/assetWorkflow";
 import { getEditorialStatusResponseMap } from "@/lib/editorial/editorialStatus";
-import type { EditorialAssetStatus } from "@/lib/editorial/editorialStatus";
+import type { EditorialAssetStatus } from "@/lib/editorial/assetStorage";
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,23 +21,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!newStatus || typeof newStatus !== "string" || !statusList.some((status) => status.key === newStatus)) {
+    if (!newStatus || typeof newStatus !== "string") {
       return NextResponse.json(
         {
           ok: false,
-          message: `El estado ${newStatus} no es válido.`,
-        },
-        { status: 400 }
-      );
-    }
-
-    // Convertir newStatus a EditorialAssetStatus
-    const validStatuses: EditorialAssetStatus[] = ["draft", "review", "ready"];
-    if (!validStatuses.includes(newStatus as EditorialAssetStatus)) {
-      return NextResponse.json(
-        {
-          ok: false,
-          message: `El estado ${newStatus} no es válido.`,
+          message: "newStatus es obligatorio.",
         },
         { status: 400 }
       );
@@ -55,12 +43,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Forzar la conversión de newStatus a EditorialAssetStatus
-    const status: EditorialAssetStatus = newStatus as EditorialAssetStatus;
-    const result = await transitionAssetEditorialStatus(asset, status);
+    const statusExists = statusList.some((status) => status.key === newStatus);
+
+    if (!statusExists) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: `El estado ${newStatus} no es válido.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    const result = await transitionAssetEditorialStatus(
+      asset,
+      newStatus as EditorialAssetStatus
+    );
+
     const statusMap = getEditorialStatusResponseMap();
 
-    // Ajuste: eliminamos 'files' del retorno
     return NextResponse.json(
       {
         ok: true,

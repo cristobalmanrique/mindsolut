@@ -25,10 +25,6 @@ export default function EditorialPanel() {
     return availableTopics.find((topic) => topic.id === selectedTopicId) ?? null;
   }, [availableTopics, selectedTopicId]);
 
-  const statusOrderMap = useMemo(() => {
-    return new Map(statusList.map((status, index) => [status.key, index]));
-  }, []);
-
   const topicAssets = useMemo(() => {
     if (!selectedTopicId) {
       return [];
@@ -36,19 +32,8 @@ export default function EditorialPanel() {
 
     return assets
       .filter((asset) => asset.topicId === selectedTopicId)
-      .sort((a, b) => {
-        const statusA = statusMap[a.id] || "draft";
-        const statusB = statusMap[b.id] || "draft";
-        const orderA = statusOrderMap.get(statusA) ?? Number.MAX_SAFE_INTEGER;
-        const orderB = statusOrderMap.get(statusB) ?? Number.MAX_SAFE_INTEGER;
-
-        if (orderA !== orderB) {
-          return orderA - orderB;
-        }
-
-        return a.title.localeCompare(b.title, "es");
-      });
-  }, [selectedTopicId, statusMap, statusOrderMap]);
+      .sort((a, b) => a.title.localeCompare(b.title, "es"));
+  }, [selectedTopicId]);
 
   useEffect(() => {
     if (!selectedTopicId && availableTopics.length > 0) {
@@ -159,6 +144,28 @@ export default function EditorialPanel() {
       </div>
     );
   }
+
+  // Ajuste en ordenación por estado
+  const statusOrderMap: Map<string, number> = new Map([
+    ["draft", 1],
+    ["review", 2],
+    ["ready", 3],
+  ]);
+
+  topicAssets.sort((a, b) => {
+    const statusA = statusMap[a.id] || "draft";
+    const statusB = statusMap[b.id] || "draft";
+
+    // Asegurarse de que statusA y statusB son cadenas antes de compararlos
+    const orderA = statusOrderMap.get(statusA as string) ?? Number.MAX_SAFE_INTEGER;
+    const orderB = statusOrderMap.get(statusB as string) ?? Number.MAX_SAFE_INTEGER;
+
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+
+    return a.title.localeCompare(b.title, "es");
+  });
 
   return (
     <div className="space-y-6">

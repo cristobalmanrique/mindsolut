@@ -4,9 +4,6 @@ import { assets } from "@/data/assets";
 import type { AssetItem } from "@/types/content";
 import type { EditorialAssetStatus } from "./assetStorage";
 
-// Asegurándonos de exportar EditorialAssetStatus correctamente
-export type EditorialAssetStatus = 'draft' | 'review' | 'ready'; 
-
 export type EditorialStatusRecord = {
   assetId: string;
   slug?: string;
@@ -25,6 +22,10 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function getAssetSlug(assetId: string): string | undefined {
+  return assets.find((asset) => asset.id === assetId)?.slug;
+}
+
 function normalizeRecord(
   assetId: string,
   value: unknown
@@ -32,7 +33,7 @@ function normalizeRecord(
   if (typeof value === "string") {
     return {
       assetId,
-      slug: assets.find((asset) => asset.id === assetId)?.slug,
+      slug: getAssetSlug(assetId),
       status: value as EditorialAssetStatus,
     };
   }
@@ -43,39 +44,39 @@ function normalizeRecord(
 
   return {
     assetId,
-    slug:
-      typeof value.slug === "string"
-        ? value.slug
-        : assets.find((asset) => asset.id === assetId)?.slug,
+    slug: typeof value.slug === "string" ? value.slug : getAssetSlug(assetId),
     status: value.status as EditorialAssetStatus,
-    updatedAt: typeof value.updatedAt === "string" ? value.updatedAt : undefined,
+    updatedAt:
+      typeof value.updatedAt === "string" ? value.updatedAt : undefined,
   };
 }
 
 function normalizeRawStatusFile(raw: unknown): EditorialStatusRecord[] {
   if (Array.isArray(raw)) {
-    return raw
-      .map((item) => {
-        if (
-          !isObject(item) ||
-          typeof item.assetId !== "string" ||
-          typeof item.status !== "string"
-        ) {
-          return null;
-        }
+    const records: EditorialStatusRecord[] = [];
 
-        return {
-          assetId: item.assetId,
-          slug:
-            typeof item.slug === "string"
-              ? item.slug
-              : assets.find((asset) => asset.id === item.assetId)?.slug,
-          status: item.status as EditorialAssetStatus,
-          updatedAt:
-            typeof item.updatedAt === "string" ? item.updatedAt : undefined,
-        } satisfies EditorialStatusRecord;
-      })
-      .filter((item): item is EditorialStatusRecord => item !== null);
+    for (const item of raw) {
+      if (
+        !isObject(item) ||
+        typeof item.assetId !== "string" ||
+        typeof item.status !== "string"
+      ) {
+        continue;
+      }
+
+      records.push({
+        assetId: item.assetId,
+        slug:
+          typeof item.slug === "string"
+            ? item.slug
+            : getAssetSlug(item.assetId),
+        status: item.status as EditorialAssetStatus,
+        updatedAt:
+          typeof item.updatedAt === "string" ? item.updatedAt : undefined,
+      });
+    }
+
+    return records;
   }
 
   if (isObject(raw) && Array.isArray(raw.assets)) {
@@ -83,9 +84,17 @@ function normalizeRawStatusFile(raw: unknown): EditorialStatusRecord[] {
   }
 
   if (isObject(raw)) {
-    return Object.entries(raw)
-      .map(([assetId, value]) => normalizeRecord(assetId, value))
-      .filter((item): item is EditorialStatusRecord => item !== null);
+    const records: EditorialStatusRecord[] = [];
+
+    for (const [assetId, value] of Object.entries(raw)) {
+      const record = normalizeRecord(assetId, value);
+
+      if (record) {
+        records.push(record);
+      }
+    }
+
+    return records;
   }
 
   return [];
@@ -106,7 +115,10 @@ export function getEditorialStatusMap(): Map<string, EditorialStatusRecord> {
   );
 }
 
-export function getEditorialStatusResponseMap(): Record<string, EditorialAssetStatus> {
+export function getEditorialStatusResponseMap(): Record<
+  string,
+  EditorialAssetStatus
+> {
   return Object.fromEntries(
     readEditorialStatusRecords().map((record) => [record.assetId, record.status])
   );

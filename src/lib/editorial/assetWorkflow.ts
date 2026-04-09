@@ -1,6 +1,7 @@
 import type { AssetItem } from "@/types/content";
+import type { EditorialAssetStatus } from "@/lib/editorial/assetStorage";
+// Asegúrate de importar desde editorialStatus.ts
 import {
-  EditorialAssetStatus,
   ensureEditorialStorageDirs,
   fileExists,
   getDraftPdfAbsolutePath,
