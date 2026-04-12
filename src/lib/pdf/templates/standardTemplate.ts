@@ -3,6 +3,11 @@ import type {
   WorksheetBuildResult,
   StandardExercise,
 } from "../types";
+import {
+  getWorksheetChromeStyles,
+  renderWorksheetFooter,
+  renderWorksheetHeader,
+} from "./chrome";
 
 function getExerciseResult(exercise: StandardExercise): number {
   switch (exercise.operator) {
@@ -51,10 +56,6 @@ export function renderStandardTemplate(
   worksheet: WorksheetBuildResult
 ): string {
   const exercises = worksheet.exercises as StandardExercise[];
-  const assetUrl = `https://mindsolut.com/recurso/${asset.slug}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(
-    assetUrl
-  )}`;
 
   return `
   <!doctype html>
@@ -63,77 +64,12 @@ export function renderStandardTemplate(
       <meta charset="UTF-8" />
       <title>${worksheet.title}</title>
       <style>
-        @page {
-          size: A4;
-          margin: 10mm;
-        }
-
-        body {
-          font-family: Arial, Helvetica, sans-serif;
-          color: #111827;
-          margin: 0;
-          padding: 0;
-          background: #ffffff;
-        }
-
-        .sheet {
-          max-width: 760px;
-          margin: 0 auto;
-          border: 2px dashed #cbd5e1;
-          border-radius: 18px;
-          padding: 18px 20px 14px;
-          background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
-          page-break-inside: avoid;
-          break-inside: avoid;
-        }
-
-        .header {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 14px;
-          margin-bottom: 14px;
-        }
-
-        .header-left {
-          flex: 1;
-        }
-
-        .badge {
-          display: inline-block;
-          background: #e0f2fe;
-          color: #075985;
-          border-radius: 999px;
-          padding: 5px 10px;
-          font-size: 11px;
-          font-weight: 700;
-          margin-bottom: 8px;
-        }
-
-        .title {
-          font-size: 25px;
-          line-height: 1.12;
-          font-weight: 800;
-          color: #0f172a;
-          margin: 0 0 6px 0;
-        }
-
-        .instruction {
-          font-size: 14px;
-          line-height: 1.4;
-          color: #475569;
-          margin: 0;
-        }
-
-        .mini-illustration {
-          font-size: 34px;
-          line-height: 1;
-        }
+        ${getWorksheetChromeStyles()}
 
         .student-row {
           display: flex;
           gap: 16px;
-          margin: 12px 0 16px;
+          margin: 0 0 14px;
         }
 
         .student-field {
@@ -147,14 +83,14 @@ export function renderStandardTemplate(
         .grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px 24px;
+          gap: 8px 22px;
         }
 
         .exercise {
-          font-size: 20px;
-          padding: 6px 0;
+          font-size: 19px;
+          padding: 5px 0;
           border-bottom: 1px dashed #cbd5e1;
-          min-height: 34px;
+          min-height: 32px;
         }
 
         .exercise-index {
@@ -173,20 +109,20 @@ export function renderStandardTemplate(
           display: flex;
           align-items: flex-start;
           gap: 8px;
-          padding: 4px 0 6px;
+          padding: 4px 0 5px;
           border-bottom: 1px dashed #cbd5e1;
-          min-height: 72px;
+          min-height: 68px;
         }
 
         .vertical-box {
           text-align: right;
-          font-size: 20px;
-          min-width: 80px;
+          font-size: 19px;
+          min-width: 74px;
         }
 
         .vertical-row {
-          height: 22px;
-          line-height: 22px;
+          height: 21px;
+          line-height: 21px;
           color: #0f172a;
         }
 
@@ -196,72 +132,34 @@ export function renderStandardTemplate(
         }
 
         .vertical-result {
-          min-height: 22px;
-        }
-
-        .footer {
-          margin-top: 16px;
-          border-top: 1px solid #e2e8f0;
-          padding-top: 10px;
-        }
-
-        .footer-content {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 14px;
-        }
-
-        .footer-text {
-          font-size: 11px;
-          line-height: 1.45;
-          color: #64748b;
-        }
-
-        .footer-link {
-          font-weight: 700;
-          color: #0f172a;
-          word-break: break-word;
-        }
-
-        .qr {
-          width: 72px;
-          height: 72px;
-          object-fit: contain;
-          flex-shrink: 0;
+          min-height: 21px;
         }
       </style>
     </head>
     <body>
-      <div class="sheet">
-        <div class="header">
-          <div class="header-left">
-            <div class="badge">FICHA ESTÁNDAR</div>
-            <h1 class="title">${worksheet.title}</h1>
-            <p class="instruction">${worksheet.instruction}</p>
+      ${renderWorksheetHeader({
+        badge: "FICHA ESTÁNDAR",
+        title: worksheet.title,
+        instruction: worksheet.instruction,
+        emoji: "📘✏️",
+      })}
+
+      <main class="worksheet-main">
+        <div class="worksheet-panel">
+          <div class="student-row">
+            <div class="student-field">Nombre:</div>
+            <div class="student-field">Fecha:</div>
           </div>
-          <div class="mini-illustration">📘✏️</div>
-        </div>
 
-        <div class="student-row">
-          <div class="student-field">Nombre:</div>
-          <div class="student-field">Fecha:</div>
-        </div>
-
-        <div class="grid">
-          ${exercises.map((exercise, index) => renderStandardExercise(exercise, index)).join("")}
-        </div>
-
-        <div class="footer">
-          <div class="footer-content">
-            <div class="footer-text">
-              <div>Mindsolut · Recurso imprimible</div>
-              <div class="footer-link">${assetUrl}</div>
-            </div>
-            <img class="qr" src="${qrUrl}" alt="QR Mindsolut" />
+          <div class="grid">
+            ${exercises
+              .map((exercise, index) => renderStandardExercise(exercise, index))
+              .join("")}
           </div>
         </div>
-      </div>
+      </main>
+
+      ${renderWorksheetFooter(asset)}
     </body>
   </html>
   `;

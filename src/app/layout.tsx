@@ -4,6 +4,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
+metadataBase: new URL("https://mindsolut.com"),
   title: "Mindsolut",
   description: "Fichas educativas de primaria organizadas por topic.",
 };

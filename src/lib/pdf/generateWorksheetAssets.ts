@@ -33,22 +33,22 @@ export async function generateWorksheetAssets(
     const page = await browser.newPage();
 
     await page.setViewport({
-      width: 900,
-      height: 1200,
-      deviceScaleFactor: 1.2,
+      width: 816,
+      height: 1056,
+      deviceScaleFactor: 1.25,
     });
 
     await page.setContent(html, { waitUntil: "networkidle0" });
 
     await page.pdf({
       path: pdfPath,
-      width: "210mm",
-      height: "297mm",
+      width: "8.5in",
+      height: "11in",
       printBackground: true,
       margin: {
         top: "10mm",
         right: "10mm",
-        bottom: "10mm",
+        bottom: "18mm",
         left: "10mm",
       },
       preferCSSPageSize: true,
