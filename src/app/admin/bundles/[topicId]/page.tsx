@@ -4,28 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { bundles } from "@/data/bundles";
 import { topics } from "@/data/topics";
+import type { BundleItem, TopicItem } from "@/types/content";
 import type { BundleEditorialStatusValue } from "@/lib/bundles/types";
-
-type BundleLike = {
-  id: string;
-  slug: string;
-  title: string;
-  description?: string;
-  topicIds: string[];
-  assetIds: string[];
-  status?: string;
-  price?: number;
-  currency?: string;
-};
-
-type TopicLike = {
-  id: string;
-  title?: string;
-  name?: string;
-  slug?: string;
-  subject?: string;
-  grade?: string;
-};
 
 type BundleStatusRecord = {
   bundleId: string;
@@ -81,10 +61,10 @@ const STATUS_OPTIONS: Array<{
   { value: "ready", label: "Ready" },
 ];
 
-function buildTopicLabel(topic: TopicLike | null) {
+function buildTopicLabel(topic: TopicItem | null) {
   if (!topic) return "Topic";
 
-  const title = topic.title ?? topic.name ?? topic.slug ?? topic.id;
+  const title = topic.title || topic.slug || topic.id;
   const subject = topic.subject ? `${topic.subject} · ` : "";
   const grade = topic.grade ? ` · ${topic.grade}` : "";
 
@@ -100,7 +80,16 @@ async function postJson<T>(url: string, body: Record<string, unknown>) {
     body: JSON.stringify(body),
   });
 
-  const data = (await response.json()) as T & { error?: string };
+  const contentType = response.headers.get("content-type") || "";
+  const raw = await response.text();
+
+  if (!contentType.includes("application/json")) {
+    throw new Error(
+      `La ruta ${url} no devolvió JSON. Status: ${response.status}`
+    );
+  }
+
+  const data = JSON.parse(raw) as T & { error?: string };
 
   if (!response.ok) {
     throw new Error(data.error || `Request failed: ${response.status}`);
@@ -111,7 +100,17 @@ async function postJson<T>(url: string, body: Record<string, unknown>) {
 
 async function getJson<T>(url: string) {
   const response = await fetch(url);
-  const data = (await response.json()) as T & { error?: string };
+
+  const contentType = response.headers.get("content-type") || "";
+  const raw = await response.text();
+
+  if (!contentType.includes("application/json")) {
+    throw new Error(
+      `La ruta ${url} no devolvió JSON. Status: ${response.status}`
+    );
+  }
+
+  const data = JSON.parse(raw) as T & { error?: string };
 
   if (!response.ok) {
     throw new Error(data.error || `Request failed: ${response.status}`);
@@ -179,25 +178,30 @@ function prettyJson(value: unknown) {
 
 export default function TopicBundlesPage() {
   const params = useParams<{ topicId: string }>();
-  const resolvedTopicId = typeof params?.topicId === "string" ? params.topicId : "";
+  const resolvedTopicId =
+    typeof params?.topicId === "string" ? params.topicId : "";
 
-  const [statusMap, setStatusMap] = useState<Record<string, BundleStatusRecord | null>>({});
+  const [statusMap, setStatusMap] = useState<
+    Record<string, BundleStatusRecord | null>
+  >({});
   const [notesMap, setNotesMap] = useState<Record<string, string>>({});
-  const [statusDraftMap, setStatusDraftMap] = useState<Record<string, BundleEditorialStatusValue>>(
-    {}
-  );
+  const [statusDraftMap, setStatusDraftMap] = useState<
+    Record<string, BundleEditorialStatusValue>
+  >({});
   const [busyBundleId, setBusyBundleId] = useState<string | null>(null);
   const [pageMessage, setPageMessage] = useState<string>("");
-  const [validationResult, setValidationResult] = useState<ValidationResponse | null>(null);
-  const [generationResult, setGenerationResult] = useState<GenerationResponse | null>(null);
+  const [validationResult, setValidationResult] =
+    useState<ValidationResponse | null>(null);
+  const [generationResult, setGenerationResult] =
+    useState<GenerationResponse | null>(null);
   const [seoResult, setSeoResult] = useState<GenerationResponse | null>(null);
 
   const topic = useMemo(() => {
-    return (topics as TopicLike[]).find((item) => item.id === resolvedTopicId) ?? null;
+    return topics.find((item: TopicItem) => item.id === resolvedTopicId) ?? null;
   }, [resolvedTopicId]);
 
   const topicBundles = useMemo(() => {
-    return (bundles as BundleLike[]).filter((bundle) =>
+    return bundles.filter((bundle: BundleItem) =>
       bundle.topicIds.includes(resolvedTopicId)
     );
   }, [resolvedTopicId]);
@@ -211,10 +215,12 @@ export default function TopicBundlesPage() {
 
     async function loadStatuses() {
       const entries = await Promise.all(
-        topicBundles.map(async (bundle) => {
+        topicBundles.map(async (bundle: BundleItem) => {
           try {
             const result = await getJson<StatusApiResponse>(
-              `/api/admin/bundles/status?bundleId=${encodeURIComponent(bundle.id)}`
+              `/api/admin/bundles/status?bundleId=${encodeURIComponent(
+                bundle.id
+              )}`
             );
             return [bundle.id, result.record ?? null] as const;
           } catch {
@@ -259,21 +265,25 @@ export default function TopicBundlesPage() {
         `/api/admin/bundles/status?bundleId=${encodeURIComponent(bundleId)}`
       );
 
+      const record = result.record ?? null;
+
       setStatusMap((prev) => ({
         ...prev,
-        [bundleId]: result.record ?? null,
+        [bundleId]: record,
       }));
 
-      if (result.record) {
-        setNotesMap((prev) => ({
-          ...prev,
-          [bundleId]: result.record?.notes ?? "",
-        }));
-        setStatusDraftMap((prev) => ({
-          ...prev,
-          [bundleId]: result.record?.status ?? "draft",
-        }));
+      if (!record) {
+        return;
       }
+
+      setNotesMap((prev) => ({
+        ...prev,
+        [bundleId]: record.notes ?? "",
+      }));
+      setStatusDraftMap((prev) => ({
+        ...prev,
+        [bundleId]: record.status,
+      }));
     } catch {
       setStatusMap((prev) => ({
         ...prev,
@@ -282,7 +292,7 @@ export default function TopicBundlesPage() {
     }
   }
 
-  async function saveBundleStatus(bundle: BundleLike) {
+  async function saveBundleStatus(bundle: BundleItem) {
     setBusyBundleId(bundle.id);
     setPageMessage(`Actualizando estado de ${bundle.slug}...`);
 
@@ -414,13 +424,21 @@ export default function TopicBundlesPage() {
 
             <div className="grid min-w-[320px] grid-cols-2 gap-3">
               <SummaryCard title="Bundles" value={topicBundles.length} />
-              <SummaryCard title="Review" value={statusCounters.review} tone="warning" />
+              <SummaryCard
+                title="Review"
+                value={statusCounters.review}
+                tone="warning"
+              />
               <SummaryCard
                 title="SEO Optimized"
                 value={statusCounters["seo-optimized"]}
                 tone="success"
               />
-              <SummaryCard title="Ready" value={statusCounters.ready} tone="success" />
+              <SummaryCard
+                title="Ready"
+                value={statusCounters.ready}
+                tone="success"
+              />
             </div>
           </div>
         </header>
@@ -491,8 +509,12 @@ export default function TopicBundlesPage() {
                   return (
                     <tr key={bundle.id} className="border-t border-slate-200 align-top">
                       <td className="px-4 py-4">
-                        <div className="font-semibold text-slate-900">{bundle.title}</div>
-                        <div className="mt-1 text-xs text-slate-500">{bundle.slug}</div>
+                        <div className="font-semibold text-slate-900">
+                          {bundle.title}
+                        </div>
+                        <div className="mt-1 text-xs text-slate-500">
+                          {bundle.slug}
+                        </div>
                         {bundle.description ? (
                           <div className="mt-2 max-w-md text-sm leading-6 text-slate-600">
                             {bundle.description}
@@ -522,7 +544,8 @@ export default function TopicBundlesPage() {
                           onChange={(event) =>
                             setStatusDraftMap((prev) => ({
                               ...prev,
-                              [bundle.id]: event.target.value as BundleEditorialStatusValue,
+                              [bundle.id]:
+                                event.target.value as BundleEditorialStatusValue,
                             }))
                           }
                           className="w-44 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
@@ -582,7 +605,9 @@ export default function TopicBundlesPage() {
         <section className="mt-6 grid gap-6 xl:grid-cols-3">
           {validationResult ? (
             <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-1">
-              <h2 className="text-lg font-semibold text-slate-950">Validación</h2>
+              <h2 className="text-lg font-semibold text-slate-950">
+                Validación
+              </h2>
               <pre className="mt-3 max-h-96 overflow-auto rounded-xl bg-slate-950 p-4 text-xs text-slate-100">
                 {prettyJson(validationResult)}
               </pre>
@@ -591,7 +616,9 @@ export default function TopicBundlesPage() {
 
           {generationResult ? (
             <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-1">
-              <h2 className="text-lg font-semibold text-slate-950">Generación</h2>
+              <h2 className="text-lg font-semibold text-slate-950">
+                Generación
+              </h2>
               <pre className="mt-3 max-h-96 overflow-auto rounded-xl bg-slate-950 p-4 text-xs text-slate-100">
                 {prettyJson(generationResult)}
               </pre>

@@ -58,14 +58,19 @@ async function postJson<T>(url: string, body: Record<string, unknown>) {
     body: JSON.stringify(body),
   });
 
-  const data = (await response.json()) as T;
+  const contentType = response.headers.get("content-type") || "";
+  const raw = await response.text();
+
+  if (!contentType.includes("application/json")) {
+    throw new Error(
+      `La ruta ${url} no devolvió JSON. Status: ${response.status}`
+    );
+  }
+
+  const data = JSON.parse(raw) as T & { error?: string };
 
   if (!response.ok) {
-    throw new Error(
-      typeof (data as Record<string, unknown>).error === "string"
-        ? ((data as Record<string, unknown>).error as string)
-        : `Request failed: ${response.status}`
-    );
+    throw new Error(data.error || `Request failed: ${response.status}`);
   }
 
   return data;
@@ -117,23 +122,23 @@ function ResultBlock({
 }
 
 export default function AdminBundlesPage() {
-const topicOptions = useMemo<TopicOption[]>(() => {
-  return topics.map((topic: TopicItem) => ({
-    id: topic.id,
-    label: buildTopicLabel(topic),
-  }));
-}, []);
+  const topicOptions = useMemo<TopicOption[]>(() => {
+    return topics.map((topic: TopicItem) => ({
+      id: topic.id,
+      label: buildTopicLabel(topic),
+    }));
+  }, []);
 
   const bundleCountByTopic = useMemo<Record<string, number>>(() => {
     const counts: Record<string, number> = {};
 
-for (const bundle of bundles) {
-  const topicIds = bundle.topicIds ?? [];
+    for (const bundle of bundles as BundleItem[]) {
+      const topicIds = bundle.topicIds ?? [];
 
-  for (const topicId of topicIds) {
-    counts[topicId] = (counts[topicId] ?? 0) + 1;
-  }
-}
+      for (const topicId of topicIds) {
+        counts[topicId] = (counts[topicId] ?? 0) + 1;
+      }
+    }
 
     return counts;
   }, []);
@@ -143,8 +148,12 @@ for (const bundle of bundles) {
   );
   const [isBusy, setIsBusy] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string>("");
-  const [validationResult, setValidationResult] = useState<ApiResponse | null>(null);
-  const [generationResult, setGenerationResult] = useState<ApiResponse | null>(null);
+  const [validationResult, setValidationResult] = useState<ApiResponse | null>(
+    null
+  );
+  const [generationResult, setGenerationResult] = useState<ApiResponse | null>(
+    null
+  );
   const [seoResult, setSeoResult] = useState<ApiResponse | null>(null);
 
   async function runValidation() {
@@ -256,7 +265,10 @@ for (const bundle of bundles) {
                 title="Topics con bundles"
                 value={Object.keys(bundleCountByTopic).length}
               />
-              <SummaryCard title="Bundles del topic" value={selectedTopicBundleCount} />
+              <SummaryCard
+                title="Bundles del topic"
+                value={selectedTopicBundleCount}
+              />
             </div>
           </div>
         </header>
@@ -434,15 +446,24 @@ for (const bundle of bundles) {
 
           <div className="space-y-6 xl:col-span-2">
             {validationResult ? (
-              <ResultBlock title="Resultado de validación" data={validationResult} />
+              <ResultBlock
+                title="Resultado de validación"
+                data={validationResult}
+              />
             ) : null}
 
             {generationResult ? (
-              <ResultBlock title="Resultado de generación de packs" data={generationResult} />
+              <ResultBlock
+                title="Resultado de generación de packs"
+                data={generationResult}
+              />
             ) : null}
 
             {seoResult ? (
-              <ResultBlock title="Resultado de generación SEO" data={seoResult} />
+              <ResultBlock
+                title="Resultado de generación SEO"
+                data={seoResult}
+              />
             ) : null}
 
             {!validationResult && !generationResult && !seoResult ? (
