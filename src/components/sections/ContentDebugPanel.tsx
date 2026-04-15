@@ -48,7 +48,7 @@ export default function ContentDebugPanel() {
                 <p className="font-medium text-white">{asset.title}</p>
                 <p className="text-sm text-slate-400">{asset.description}</p>
                 <p className="mt-1 text-xs text-slate-500">
-                  {asset.type} ú {asset.language} ú {asset.isPremium ? "Premium" : "Gratis"} ú{" "}
+                  {asset.type} ú {asset.language} ú {asset.accessType === "premium" ? "Premium" : "Gratis"} ú{" "}
                   {asset.status}
                 </p>
               </li>

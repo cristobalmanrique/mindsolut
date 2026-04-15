@@ -1,1 +1,26 @@
-{}
+{
+  "bundle-sumas-con-llevadas-2-primaria": {
+    "bundleId": "bundle-sumas-con-llevadas-2-primaria",
+    "slug": "sumas-con-llevadas-2-primaria-pack",
+    "status": "seo-optimized",
+    "topicIds": [
+      "topic-2-primaria-sumas"
+    ],
+    "updatedAt": "2026-04-15T22:45:38.168Z",
+    "notes": "",
+    "generatedAt": "2026-04-15T02:07:57.162Z",
+    "seoGeneratedAt": "2026-04-15T22:45:38.168Z"
+  },
+  "bundle-restas-con-llevadas-2-primaria": {
+    "bundleId": "bundle-restas-con-llevadas-2-primaria",
+    "slug": "restas-con-llevadas-2-primaria-pack",
+    "status": "seo-optimized",
+    "topicIds": [
+      "topic-2-primaria-restas"
+    ],
+    "updatedAt": "2026-04-15T22:46:11.466Z",
+    "notes": "",
+    "generatedAt": "2026-04-15T02:08:57.779Z",
+    "seoGeneratedAt": "2026-04-15T22:46:11.466Z"
+  }
+}

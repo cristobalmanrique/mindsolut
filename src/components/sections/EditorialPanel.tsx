@@ -4,9 +4,29 @@ import { useEffect, useMemo, useState } from "react";
 import { assets } from "@/data/assets";
 import { topics } from "@/data/topics";
 import { statusList } from "@/data/status";
-import { getNextStatus, getPreviousStatus } from "@/lib/editorial";
+import { getNextStatus, getPreviousStatus, getStatusIndex } from "@/lib/editorial";
 
 type StatusMap = Record<string, string>;
+
+function canMoveToStatus(
+  currentStatus: string,
+  nextStatus: string | null,
+  accessType: "free" | "premium"
+) {
+  if (!nextStatus) {
+    return false;
+  }
+
+  if (
+    accessType === "premium" &&
+    currentStatus === "review" &&
+    nextStatus === "seo-optimized"
+  ) {
+    return false;
+  }
+
+  return true;
+}
 
 export default function EditorialPanel() {
   const [statusMap, setStatusMap] = useState<StatusMap>({});
@@ -30,10 +50,20 @@ export default function EditorialPanel() {
       return [];
     }
 
-    return assets
+    return [...assets]
       .filter((asset) => asset.topicId === selectedTopicId)
-      .sort((a, b) => a.title.localeCompare(b.title, "es"));
-  }, [selectedTopicId]);
+      .sort((a, b) => {
+        const statusA = statusMap[a.id] || a.status || "draft";
+        const statusB = statusMap[b.id] || b.status || "draft";
+        const statusDiff = getStatusIndex(statusA) - getStatusIndex(statusB);
+
+        if (statusDiff !== 0) {
+          return statusDiff;
+        }
+
+        return a.title.localeCompare(b.title, "es");
+      });
+  }, [selectedTopicId, statusMap]);
 
   useEffect(() => {
     if (!selectedTopicId && availableTopics.length > 0) {
@@ -61,10 +91,15 @@ export default function EditorialPanel() {
   }, []);
 
   async function updateStatus(assetId: string, newStatus: string) {
-    const previousStatus = statusMap[assetId] || "draft";
+    const asset = assets.find((item) => item.id === assetId);
+
+    if (!asset) {
+      return;
+    }
+
+    const previousStatus = statusMap[assetId] || asset.status || "draft";
 
     setUpdatingAssetId(assetId);
-
     setStatusMap((prev) => ({
       ...prev,
       [assetId]: newStatus,
@@ -114,29 +149,6 @@ export default function EditorialPanel() {
     return statusList.find((status) => status.key === statusKey)?.label ?? statusKey;
   }
 
-  function handleManageStatesClick(
-    event: React.MouseEvent<HTMLButtonElement>
-  ) {
-    event.preventDefault();
-    event.stopPropagation();
-    setShowTable(true);
-  }
-
-  function handleStatusChangeClick(
-    event: React.MouseEvent<HTMLButtonElement>,
-    assetId: string,
-    newStatus: string | null
-  ) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (!newStatus) {
-      return;
-    }
-
-    void updateStatus(assetId, newStatus);
-  }
-
   if (loading) {
     return (
       <div className="rounded-2xl border border-slate-800 bg-slate-900 px-5 py-4">
@@ -144,28 +156,6 @@ export default function EditorialPanel() {
       </div>
     );
   }
-
-  // Ajuste en ordenación por estado
-  const statusOrderMap: Map<string, number> = new Map([
-    ["draft", 1],
-    ["review", 2],
-    ["ready", 3],
-  ]);
-
-  topicAssets.sort((a, b) => {
-    const statusA = statusMap[a.id] || "draft";
-    const statusB = statusMap[b.id] || "draft";
-
-    // Asegurarse de que statusA y statusB son cadenas antes de compararlos
-    const orderA = statusOrderMap.get(statusA as string) ?? Number.MAX_SAFE_INTEGER;
-    const orderB = statusOrderMap.get(statusB as string) ?? Number.MAX_SAFE_INTEGER;
-
-    if (orderA !== orderB) {
-      return orderA - orderB;
-    }
-
-    return a.title.localeCompare(b.title, "es");
-  });
 
   return (
     <div className="space-y-6">
@@ -202,7 +192,7 @@ export default function EditorialPanel() {
 
           <button
             type="button"
-            onClick={handleManageStatesClick}
+            onClick={() => setShowTable(true)}
             disabled={!selectedTopicId}
             className="inline-flex items-center justify-center rounded-xl bg-cyan-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -216,8 +206,7 @@ export default function EditorialPanel() {
           <div className="border-b border-slate-800 px-5 py-4">
             <h2 className="text-lg font-semibold text-white">{selectedTopic.title}</h2>
             <p className="mt-1 text-sm text-slate-400">
-              {topicAssets.length} asset{topicAssets.length === 1 ? "" : "s"} en este
-              topic
+              {topicAssets.length} asset{topicAssets.length === 1 ? "" : "s"} en este topic
             </p>
           </div>
 
@@ -227,6 +216,9 @@ export default function EditorialPanel() {
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
                     Asset
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    Acceso
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
                     Estado actual
@@ -239,13 +231,16 @@ export default function EditorialPanel() {
 
               <tbody className="divide-y divide-slate-800">
                 {topicAssets.map((asset) => {
-                  const currentStatus = statusMap[asset.id] || "draft";
+                  const currentStatus = statusMap[asset.id] || asset.status || "draft";
                   const previousStatus = getPreviousStatus(currentStatus);
                   const nextStatus = getNextStatus(currentStatus);
                   const currentStatusLabel = getStatusLabel(currentStatus);
                   const previousStatusLabel = getStatusLabel(previousStatus);
                   const nextStatusLabel = getStatusLabel(nextStatus);
                   const isUpdating = updatingAssetId === asset.id;
+                  const nextDisabled =
+                    isUpdating ||
+                    !canMoveToStatus(currentStatus, nextStatus, asset.accessType);
 
                   return (
                     <tr key={asset.id} className="align-top">
@@ -267,6 +262,12 @@ export default function EditorialPanel() {
 
                       <td className="px-4 py-4">
                         <span className="inline-flex rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-sm font-medium text-slate-200">
+                          {asset.accessType === "premium" ? "Premium" : "Free"}
+                        </span>
+                      </td>
+
+                      <td className="px-4 py-4">
+                        <span className="inline-flex rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-sm font-medium text-slate-200">
                           {currentStatusLabel}
                         </span>
                       </td>
@@ -276,9 +277,11 @@ export default function EditorialPanel() {
                           <button
                             type="button"
                             disabled={!previousStatus || isUpdating}
-                            onClick={(event) =>
-                              handleStatusChangeClick(event, asset.id, previousStatus)
-                            }
+                            onClick={() => {
+                              if (previousStatus) {
+                                void updateStatus(asset.id, previousStatus);
+                              }
+                            }}
                             className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             {previousStatusLabel
@@ -288,10 +291,12 @@ export default function EditorialPanel() {
 
                           <button
                             type="button"
-                            disabled={!nextStatus || isUpdating}
-                            onClick={(event) =>
-                              handleStatusChangeClick(event, asset.id, nextStatus)
-                            }
+                            disabled={nextDisabled}
+                            onClick={() => {
+                              if (nextStatus && !nextDisabled) {
+                                void updateStatus(asset.id, nextStatus);
+                              }
+                            }}
                             className="inline-flex items-center rounded-lg bg-cyan-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             {nextStatusLabel
@@ -299,6 +304,14 @@ export default function EditorialPanel() {
                               : "Siguiente"}
                           </button>
                         </div>
+
+                        {asset.accessType === "premium" &&
+                        currentStatus === "review" &&
+                        nextStatus === "seo-optimized" ? (
+                          <p className="mt-2 text-xs text-amber-300">
+                            Los assets premium no pasan a SEO optimized.
+                          </p>
+                        ) : null}
 
                         {isUpdating ? (
                           <p className="mt-2 text-xs text-cyan-400">Actualizando...</p>
@@ -311,7 +324,7 @@ export default function EditorialPanel() {
                 {topicAssets.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={3}
+                      colSpan={4}
                       className="px-4 py-8 text-center text-sm text-slate-400"
                     >
                       No hay assets asociados a este topic.

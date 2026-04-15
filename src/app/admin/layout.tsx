@@ -11,8 +11,7 @@ export default function AdminLayout({
     { href: "/admin/generacion-topic", label: "Generación por topic" },
     { href: "/admin/seo-topic", label: "SEO por topic" },
     { href: "/admin/operaciones", label: "Operaciones" },
-    { href: "/admin/generacion", label: "Generación (Deprecated)" },
-    { href: "/admin/previews-topic", label: "Previews por topic (Deprecated)" },
+    { href: "/admin/bundles", label: "Bundles" },
   ];
 
   return (

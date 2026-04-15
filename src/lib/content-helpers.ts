@@ -51,11 +51,11 @@ export function getPublishedAssets(): AssetItem[] {
 }
 
 export function getPremiumAssets(): AssetItem[] {
-  return assets.filter((asset) => asset.isPremium);
+  return assets.filter((asset) => asset.accessType === "premium");
 }
 
 export function getFreeAssets(): AssetItem[] {
-  return assets.filter((asset) => !asset.isPremium);
+  return assets.filter((asset) => asset.accessType === "free");
 }
 
 /**

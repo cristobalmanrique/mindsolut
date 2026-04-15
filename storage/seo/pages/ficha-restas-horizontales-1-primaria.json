@@ -10,10 +10,11 @@
   "type": "worksheet",
   "topicId": "topic-1-primaria-restas",
   "language": "es",
-  "isPremium": false,
+  "accessType": "free",
+  "contentRole": "standard",
   "printable": true,
   "sections": {
-    "intro": "Esta ficha de ficha de restas horizontales 1º primaria está pensada para estudiantes de topic-1-primaria-restas, en formato PDF imprimible y con una estructura clara para practicar en casa o en el aula.",
+    "intro": "Esta ficha está pensada para estudiantes de 1º primaria, en formato PDF imprimible y con una estructura clara para practicar en casa o en el aula.",
     "benefits": [
       "Formato claro y fácil de imprimir",
       "Ejercicios listos para trabajar en casa o en clase",
@@ -27,5 +28,5 @@
       "Refuerza con más práctica si es necesario"
     ]
   },
-  "generatedAt": "2026-04-04T03:39:34.842Z"
+  "generatedAt": "2026-04-15T01:34:46.024Z"
 }

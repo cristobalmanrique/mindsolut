@@ -44,6 +44,10 @@ export interface TopicItem {
   status: StatusKey;
 }
 
+export type AssetAccessType = "free" | "premium";
+
+export type AssetContentRole = "standard" | "anchor" | "bundle_only";
+
 export interface AssetItem {
   id: string;
   slug: string;
@@ -52,7 +56,8 @@ export interface AssetItem {
   type: AssetType;
   topicId: string;
   language: string;
-  isPremium: boolean;
+  accessType: AssetAccessType;
+  contentRole: AssetContentRole;
   printable: boolean;
   fileUrl: string;
   previewImage: string;

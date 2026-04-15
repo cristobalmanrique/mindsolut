@@ -2,6 +2,8 @@ import fs from "fs";
 import { bundles } from "@/data/bundles";
 import { assets } from "@/data/assets";
 import { topics } from "@/data/topics";
+import { getEditorialStatusMap } from "@/lib/editorial/editorialStatus"; // Asegúrate de importar la función correcta para obtener el estado actualizado
+
 import {
   getBundleCoverAbsolutePath,
   getBundlePdfAbsolutePath,
@@ -63,6 +65,8 @@ function createIssue(
 
 function validateBundleBase(bundle: BundleLike): BundleValidationIssue[] {
   const issues: BundleValidationIssue[] = [];
+  const editorialStatusMap = getEditorialStatusMap(); // Obtener los estados actualizados desde asset-status.json
+
 
   if (
     !bundle.topicIds?.length ||
@@ -101,12 +105,26 @@ function validateBundleBase(bundle: BundleLike): BundleValidationIssue[] {
       continue;
     }
 
-    if (asset.status !== "review") {
+    const assetStatus = editorialStatusMap.get(asset.id); // Obtener el estado actualizado desde asset-status.json
+    
+
+if (!assetStatus) {
+  issues.push(
+    createIssue(bundle, {
+      code: "ASSET_STATUS_NOT_FOUND",
+      assetId: asset.id,
+      message: `No se encontró el estado para el asset ${asset.id}.`,
+    })
+  );
+  continue; // Salta al siguiente asset si no se encuentra el estado
+}
+
+    if (assetStatus.status !== "review") {
       issues.push(
         createIssue(bundle, {
           code: "ASSET_NOT_IN_REVIEW",
           assetId,
-          message: `El asset ${assetId} debe estar en review para generar el pack.`,
+          message: `El asset ${assetId} debe estar en review para generar el pack, y está en assetStatus.status`,
         })
       );
     }

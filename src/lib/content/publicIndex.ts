@@ -53,6 +53,10 @@ function isPubliclyAvailableAsset(asset: PublicAsset) {
     return false;
   }
 
+  if (asset.accessType === "premium") {
+    return false;
+  }
+
   // Validación defensiva de rutas
   if (
     !asset.fileUrl?.startsWith("/downloads/") ||

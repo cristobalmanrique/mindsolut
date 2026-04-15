@@ -30,6 +30,10 @@ function assertForwardTransition(
   }
 }
 
+
+function isPremiumAsset(asset: AssetItem) {
+  return asset.accessType === "premium";
+}
 function movePdfToReview(asset: AssetItem) {
   const draftPath = getDraftPdfAbsolutePath(asset);
   const reviewPath = getReviewPdfAbsolutePath(asset);
@@ -88,6 +92,14 @@ export function transitionAssetEditorialStatus(
   }
 
   assertForwardTransition(currentStatus, nextStatus);
+
+  if (
+    currentStatus === "review" &&
+    nextStatus === "seo-optimized" &&
+    isPremiumAsset(asset)
+  ) {
+    throw new Error("Los assets premium no pueden pasar de review a seo-optimized.");
+  }
 
   if (currentStatus === "draft" && nextStatus === "review") {
     movePdfToReview(asset);

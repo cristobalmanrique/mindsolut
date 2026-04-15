@@ -10,10 +10,11 @@
   "type": "worksheet",
   "topicId": "topic-2-primaria-sumas",
   "language": "es",
-  "isPremium": false,
+  "accessType": "free",
+  "contentRole": "standard",
   "printable": true,
   "sections": {
-    "intro": "Esta ficha de ficha de sumas sencillas 2º primaria está pensada para estudiantes de topic-2-primaria-sumas, en formato PDF imprimible y con una estructura clara para practicar en casa o en el aula.",
+    "intro": "Esta ficha está pensada para estudiantes de 2º primaria, en formato PDF imprimible y con una estructura clara para practicar en casa o en el aula.",
     "benefits": [
       "Formato claro y fácil de imprimir",
       "Ejercicios listos para trabajar en casa o en clase",
@@ -27,5 +28,5 @@
       "Refuerza con más práctica si es necesario"
     ]
   },
-  "generatedAt": "2026-04-05T00:33:39.519Z"
+  "generatedAt": "2026-04-15T01:34:51.110Z"
 }

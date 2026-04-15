@@ -25,7 +25,8 @@ type SeoPayload = {
   type: string;
   topicId: string;
   language: string;
-  isPremium: boolean;
+  accessType: "free" | "premium";
+  contentRole: "standard" | "anchor" | "bundle_only";
   printable: boolean;
   sections: {
     intro: string;
@@ -129,7 +130,7 @@ export default async function ResourcePage({ params }: ResourcePageProps) {
         <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <section>
             <div className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800">
-              Ficha educativa
+{payload.accessType === "premium" ? "Ficha premium" : "Ficha educativa"}
             </div>
 
             <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">

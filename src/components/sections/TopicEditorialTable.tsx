@@ -13,6 +13,26 @@ type TopicEditorialTableProps = {
   topicId: string;
 };
 
+function canMoveToStatus(
+  currentStatus: string,
+  nextStatus: string | null,
+  accessType: "free" | "premium"
+) {
+  if (!nextStatus) {
+    return false;
+  }
+
+  if (
+    accessType === "premium" &&
+    currentStatus === "review" &&
+    nextStatus === "seo-optimized"
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 export default function TopicEditorialTable({
   topicId,
 }: TopicEditorialTableProps) {
@@ -31,8 +51,8 @@ export default function TopicEditorialTable({
 
   const sortedTopicAssets = useMemo(() => {
     return [...topicAssets].sort((a, b) => {
-      const statusA = statusMap[a.id] || "draft";
-      const statusB = statusMap[b.id] || "draft";
+      const statusA = statusMap[a.id] || a.status || "draft";
+      const statusB = statusMap[b.id] || b.status || "draft";
       const statusDiff = getStatusIndex(statusA) - getStatusIndex(statusB);
 
       if (statusDiff !== 0) {
@@ -70,7 +90,13 @@ export default function TopicEditorialTable({
   }
 
   async function updateStatus(assetId: string, newStatus: string) {
-    const previousStatus = statusMap[assetId] || "draft";
+    const asset = topicAssets.find((item) => item.id === assetId);
+
+    if (!asset) {
+      return;
+    }
+
+    const previousStatus = statusMap[assetId] || asset.status || "draft";
 
     setUpdatingAssetId(assetId);
     setStatusMap((prev) => ({
@@ -209,6 +235,9 @@ export default function TopicEditorialTable({
                   Asset
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Acceso
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
                   Estado actual
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -224,7 +253,7 @@ export default function TopicEditorialTable({
               {loading ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="px-4 py-8 text-center text-sm text-slate-400"
                   >
                     Cargando estados editoriales...
@@ -234,7 +263,7 @@ export default function TopicEditorialTable({
 
               {!loading &&
                 sortedTopicAssets.map((asset) => {
-                  const currentStatus = statusMap[asset.id] || "draft";
+                  const currentStatus = statusMap[asset.id] || asset.status || "draft";
                   const previousStatus = getPreviousStatus(currentStatus);
                   const nextStatus = getNextStatus(currentStatus);
                   const previousStatusLabel = getStatusLabel(previousStatus);
@@ -242,6 +271,10 @@ export default function TopicEditorialTable({
                   const nextStatusLabel = getStatusLabel(nextStatus);
                   const isUpdating = updatingAssetId === asset.id;
                   const isDeleting = deletingAssetId === asset.id;
+                  const nextDisabled =
+                    isUpdating ||
+                    isDeleting ||
+                    !canMoveToStatus(currentStatus, nextStatus, asset.accessType);
 
                   return (
                     <tr key={asset.id} className="align-top">
@@ -259,6 +292,12 @@ export default function TopicEditorialTable({
 
                           <p className="mt-2 text-xs text-slate-500">{asset.slug}</p>
                         </div>
+                      </td>
+
+                      <td className="px-4 py-4">
+                        <span className="inline-flex rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-sm font-medium text-slate-200">
+                          {asset.accessType === "premium" ? "Premium" : "Free"}
+                        </span>
                       </td>
 
                       <td className="px-4 py-4">
@@ -286,9 +325,9 @@ export default function TopicEditorialTable({
 
                           <button
                             type="button"
-                            disabled={!nextStatus || isUpdating || isDeleting}
+                            disabled={nextDisabled}
                             onClick={() => {
-                              if (nextStatus) {
+                              if (nextStatus && !nextDisabled) {
                                 void updateStatus(asset.id, nextStatus);
                               }
                             }}
@@ -299,6 +338,14 @@ export default function TopicEditorialTable({
                               : "Siguiente"}
                           </button>
                         </div>
+
+                        {asset.accessType === "premium" &&
+                        currentStatus === "review" &&
+                        nextStatus === "seo-optimized" ? (
+                          <p className="mt-2 text-xs text-amber-300">
+                            Los assets premium no pasan a SEO optimized.
+                          </p>
+                        ) : null}
 
                         {isUpdating ? (
                           <p className="mt-2 text-xs text-cyan-400">Actualizando...</p>
@@ -322,7 +369,7 @@ export default function TopicEditorialTable({
               {!loading && sortedTopicAssets.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="px-4 py-8 text-center text-sm text-slate-400"
                   >
                     No hay assets asociados a este topic.

@@ -24,7 +24,9 @@ export function buildSeoDescription(asset: AssetItem) {
 export function buildIntro(asset: AssetItem) {
   const grade = getReadableGrade(asset);
 
-  return `Esta ficha está pensada para estudiantes de ${grade}, en formato PDF imprimible y con una estructura clara para practicar en casa o en el aula.`;
+  const premiumText = asset.accessType === "premium" ? " Se trata de una ficha premium con acceso ampliado dentro del catálogo." : "";
+
+  return `Esta ficha está pensada para estudiantes de ${grade}, en formato PDF imprimible y con una estructura clara para practicar en casa o en el aula.${premiumText}`;
 }
 
 function buildBenefits(asset: AssetItem) {
@@ -32,8 +34,8 @@ function buildBenefits(asset: AssetItem) {
     "Formato claro y fácil de imprimir",
     "Ejercicios listos para trabajar en casa o en clase",
     "Recurso visual y práctico para reforzar el aprendizaje",
-    asset.isPremium
-      ? "Incluye valor pedagógico ampliado dentro del estándar premium"
+    asset.accessType === "premium"
+      ? "Ficha premium con acceso ampliado dentro del catálogo de Mindsolut"
       : "Ideal como práctica rápida y directa",
   ];
 }
@@ -62,7 +64,8 @@ export function generateSeoPayload(asset: AssetItem) {
     type: asset.type,
     topicId: asset.topicId,
     language: asset.language,
-    isPremium: asset.isPremium,
+    accessType: asset.accessType,
+    contentRole: asset.contentRole,
     printable: asset.printable,
     sections: {
       intro: buildIntro(asset),

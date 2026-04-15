@@ -29,6 +29,7 @@ export type BundleValidationIssue = {
     | "BUNDLE_COVER_MISSING"
     | "BUNDLE_PREVIEW_MISSING"
     | "BUNDLE_PDF_MISSING"
+    | "ASSET_STATUS_NOT_FOUND"
     | "BUNDLE_SEO_MISSING";
   message: string;
   assetId?: string;

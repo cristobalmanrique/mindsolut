@@ -1,0 +1,45 @@
+{
+  "id": "bundle-restas-con-llevadas-2-primaria",
+  "pageType": "bundle",
+  "slug": "restas-con-llevadas-2-primaria-pack",
+  "title": "Pack de restas con llevadas para 2º de primaria",
+  "description": "Pack imprimible en PDF con 10 fichas de restas con llevadas para 2º de primaria. Útil para reforzar cálculo, tareas y práctica guiada.",
+  "canonicalUrl": "https://mindsolut.com/pack/restas-con-llevadas-2-primaria-pack",
+  "metaTitle": "Pack de restas con llevadas para 2º de primaria",
+  "metaDescription": "Pack imprimible en PDF con 10 fichas de restas con llevadas para 2º de primaria. Útil para reforzar cálculo, tareas y práctica guiada.",
+  "h1": "Pack de restas con llevadas para 2º de primaria",
+  "intro": "Pack imprimible para 2º primaria con 10 fichas listas para descargar en PDF.",
+  "includes": [
+    "10 fichas imprimibles",
+    "Portada del pack",
+    "Cuadernillo completo en PDF"
+  ],
+  "benefits": [
+    "Ahorra tiempo frente a descargar fichas sueltas",
+    "Secuencia de práctica coherente",
+    "Útil para aula, tarea y refuerzo"
+  ],
+  "faq": [],
+  "topicId": "topic-2-primaria-restas",
+  "grade": "2º primaria",
+  "subject": "Matemáticas",
+  "educationalLevel": "2º primaria",
+  "price": 4.99,
+  "currency": "EUR",
+  "assetIds": [
+    "asset-2p-restas-w5-01",
+    "asset-2p-restas-w5-02",
+    "asset-2p-restas-w5-03",
+    "asset-2p-restas-w5-04",
+    "asset-2p-restas-w5-05",
+    "asset-2p-restas-w5-06",
+    "asset-2p-restas-w5-07",
+    "asset-2p-restas-w5-08",
+    "asset-2p-restas-w5-09",
+    "asset-2p-restas-w5-10"
+  ],
+  "coverImage": "/covers/restas-con-llevadas-2-primaria-pack.jpg",
+  "previewImage": "/previews/restas-con-llevadas-2-primaria-pack.jpg",
+  "pdfUrl": "/downloads/packs/restas-con-llevadas-2-primaria-pack.pdf",
+  "updatedAt": "2026-04-15T22:46:11.464Z"
+}

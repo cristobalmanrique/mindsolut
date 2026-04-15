@@ -1,0 +1,45 @@
+{
+  "id": "bundle-sumas-con-llevadas-2-primaria",
+  "pageType": "bundle",
+  "slug": "sumas-con-llevadas-2-primaria-pack",
+  "title": "Pack de sumas con llevadas para 2º de primaria",
+  "description": "Pack imprimible en PDF con 10 fichas de sumas con llevadas para 2º de primaria. Ideal para repaso, refuerzo y práctica en casa o en clase.",
+  "canonicalUrl": "https://mindsolut.com/pack/sumas-con-llevadas-2-primaria-pack",
+  "metaTitle": "Pack de sumas con llevadas para 2º de primaria",
+  "metaDescription": "Pack imprimible en PDF con 10 fichas de sumas con llevadas para 2º de primaria. Ideal para repaso, refuerzo y práctica en casa o en clase.",
+  "h1": "Pack de sumas con llevadas para 2º de primaria",
+  "intro": "Pack imprimible para 2º primaria con 10 fichas listas para descargar en PDF.",
+  "includes": [
+    "10 fichas imprimibles",
+    "Portada del pack",
+    "Cuadernillo completo en PDF"
+  ],
+  "benefits": [
+    "Ahorra tiempo frente a descargar fichas sueltas",
+    "Secuencia de práctica coherente",
+    "Útil para aula, tarea y refuerzo"
+  ],
+  "faq": [],
+  "topicId": "topic-2-primaria-sumas",
+  "grade": "2º primaria",
+  "subject": "Matemáticas",
+  "educationalLevel": "2º primaria",
+  "price": 4.99,
+  "currency": "EUR",
+  "assetIds": [
+    "asset-2p-sumas-w5-01",
+    "asset-2p-sumas-w5-02",
+    "asset-2p-sumas-w5-03",
+    "asset-2p-sumas-w5-04",
+    "asset-2p-sumas-w5-05",
+    "asset-2p-sumas-w5-06",
+    "asset-2p-sumas-w5-07",
+    "asset-2p-sumas-w5-08",
+    "asset-2p-sumas-w5-09",
+    "asset-2p-sumas-w5-10"
+  ],
+  "coverImage": "/covers/sumas-con-llevadas-2-primaria-pack.jpg",
+  "previewImage": "/previews/sumas-con-llevadas-2-primaria-pack.jpg",
+  "pdfUrl": "/downloads/packs/sumas-con-llevadas-2-primaria-pack.pdf",
+  "updatedAt": "2026-04-15T22:45:38.165Z"
+}

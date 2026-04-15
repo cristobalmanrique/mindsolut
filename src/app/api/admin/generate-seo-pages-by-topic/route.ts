@@ -35,21 +35,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const topicAssets = assets.filter((asset) => {
-      const effectiveStatus = getAssetEditorialStatus(asset);
-
-      return (
-        asset.topicId === topicId &&
-        asset.type === "worksheet" &&
-        effectiveStatus === "review"
-      );
-    });
+    const topicAssets = assets.filter(
+      (asset) => asset.topicId === topicId && asset.type === "worksheet"
+    );
 
     if (topicAssets.length === 0) {
       return NextResponse.json(
         {
           ok: false,
-          message: `No se encontraron assets en estado review para ${topicId}.`,
+          message: `No se encontraron assets para ${topicId}.`,
           generatedCount: 0,
           skippedCount: 0,
           failedCount: 0,
@@ -67,6 +61,24 @@ export async function POST(request: NextRequest) {
 
     for (const asset of topicAssets) {
       try {
+        const effectiveStatus = getAssetEditorialStatus(asset);
+
+        if (effectiveStatus !== "review") {
+          skipped.push({
+            file: asset.slug,
+            reason: `Estado actual: ${effectiveStatus}`,
+          });
+          continue;
+        }
+
+        if (asset.accessType === "premium") {
+          skipped.push({
+            file: asset.slug,
+            reason: "Asset premium: no genera payload SEO.",
+          });
+          continue;
+        }
+
         if (!asset.fileUrl || !asset.previewImage) {
           skipped.push({
             file: asset.slug,
@@ -77,7 +89,6 @@ export async function POST(request: NextRequest) {
 
         const payload = generateSeoPayload(asset);
         writeSeoPage(asset.slug, payload);
-
         updateAssetEditorialStatus(asset, "seo-optimized");
 
         generated.push({
@@ -100,7 +111,8 @@ export async function POST(request: NextRequest) {
       generated,
       skipped,
       failed,
-      message: `Generación SEO completada para ${topicId}. Los assets generados fueron actualizados a seo-optimized.`,
+      message:
+        "Generación SEO completada. Solo se procesaron assets en review y con accessType free.",
     });
   } catch (error) {
     return NextResponse.json(

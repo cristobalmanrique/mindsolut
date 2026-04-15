@@ -22,7 +22,7 @@ function MetricCard({
 }
 
 export default function AdminHomePage() {
-  const premiumAssets = assets.filter((item) => item.isPremium).length;
+  const premiumAssets = assets.filter((item) => item.accessType === "premium").length;
   const readyAssets = assets.filter((item) => item.status === "ready").length;
 
   return (

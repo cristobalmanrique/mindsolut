@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { assets } from "@/data/assets";
 import { statusList } from "@/data/status";
 import { transitionAssetEditorialStatus } from "@/lib/editorial/assetWorkflow";
-import { getEditorialStatusResponseMap } from "@/lib/editorial/editorialStatus";
+import {
+  getAssetEditorialStatus,
+  getEditorialStatusResponseMap,
+} from "@/lib/editorial/editorialStatus";
 import type { EditorialAssetStatus } from "@/lib/editorial/assetStorage";
 
 export async function POST(request: NextRequest) {
@@ -50,6 +53,23 @@ export async function POST(request: NextRequest) {
         {
           ok: false,
           message: `El estado ${newStatus} no es válido.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    const currentStatus = getAssetEditorialStatus(asset);
+
+    if (
+      asset.accessType === "premium" &&
+      currentStatus === "review" &&
+      newStatus === "seo-optimized"
+    ) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message:
+            "Los assets premium no pueden pasar de review a seo-optimized.",
         },
         { status: 400 }
       );

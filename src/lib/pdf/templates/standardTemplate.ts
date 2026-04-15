@@ -83,14 +83,14 @@ export function renderStandardTemplate(
         .grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 8px 22px;
+          gap: 4px 16px;
         }
 
         .exercise {
-          font-size: 19px;
-          padding: 5px 0;
+          font-size: 17px;
+          padding: 4px 0;
           border-bottom: 1px dashed #cbd5e1;
-          min-height: 32px;
+          min-height: 28px;
         }
 
         .exercise-index {
@@ -109,20 +109,20 @@ export function renderStandardTemplate(
           display: flex;
           align-items: flex-start;
           gap: 8px;
-          padding: 4px 0 5px;
+          padding: 3px 0 4px;
           border-bottom: 1px dashed #cbd5e1;
-          min-height: 68px;
+          min-height: 58px;
         }
 
         .vertical-box {
           text-align: right;
-          font-size: 19px;
-          min-width: 74px;
+          font-size: 17px;
+          min-width: 64px;
         }
 
         .vertical-row {
-          height: 21px;
-          line-height: 21px;
+          height: 18px;
+          line-height: 18px;
           color: #0f172a;
         }
 
@@ -132,7 +132,7 @@ export function renderStandardTemplate(
         }
 
         .vertical-result {
-          min-height: 21px;
+          min-height: 18px;
         }
       </style>
     </head>
